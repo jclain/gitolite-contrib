@@ -2,7 +2,7 @@
 
 Ce dépôt contient des contributions à gitolite
 
-* [HostBasedAuth]() un trigger pour authentifier basé sur l'hôte. Cela peut-être
+* [HostBasedAuth](HostBasedAuth.md) un trigger pour authentifier basé sur l'hôte. Cela peut-être
   dangereux d'un point de vue sécurité, mais peut se révéler utile pour certains
   cas d'utilisation.
 
@@ -10,7 +10,7 @@ Ce dépôt contient des contributions à gitolite
 
 This repo contains contributions to gitolite
 
-* [HostBasedAuth]() is a trigger to enable host based authentication. It's
+* [HostBasedAuth](HostBasedAuth.md) is a trigger to enable host based authentication. It's
   dangerous security-wise, but it's handy for some use-cases.
 
 -*- coding: utf-8 mode: markdown -*- vim:sw=4:sts=4:et:ai:si:sta:fenc=utf-8:noeol:binary

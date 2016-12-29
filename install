@@ -1,0 +1,15 @@
+#!/bin/bash
+# -*- coding: utf-8 mode: sh -*- vim:sw=4:sts=4:et:ai:si:sta:fenc=utf-8
+
+scriptdir="$(cd "$(dirname -- "$0")"; pwd)"
+function die() { [ $# -gt 0 ] && echo "ERROR: $*" 1>&2; exit 1; }
+
+localdir="$(gitolite query-rc LOCAL_CODE 2>/dev/null)"
+[ -n "$localdir" ] || die "LOCAL_DIR not defined"
+[ -d "$localdir" ] || {
+    echo "Creating directory $localdir..."
+    mkdir -p "$localdir" || die
+}
+
+echo "Copying files..."
+rsync -r "$scriptdir/lib" "$localdir"

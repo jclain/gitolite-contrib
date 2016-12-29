@@ -41,41 +41,41 @@ sub input {
 
     # only map anon_user
     my $user = $ARGV[0];
-    trace(1, "checking if user=$user is $anon_user");
+    trace(2, "checking if user=$user is $anon_user");
     return if $user ne $anon_user;
 
     # check ip
     (my $clientip = $ENV{SSH_CONNECTION} || '') =~ s/ .*//;
     my $clientipdesc = $clientip || "(None)";
-    trace(1, "got clientip=$clientipdesc");
+    trace(2, "got clientip=$clientipdesc");
     return unless $clientip;
     my $clienthost = __get_host($clientip);
     (my $clientname = $clienthost) =~ s/\..*$//;
     (my $clientdomain = $clienthost) =~ s/^[^.]+//;
-    trace(1, "clientip=$clientip resolves to clienthost=$clienthost");
+    trace(2, "clientip=$clientip resolves to clienthost=$clienthost");
 
     # check verb
     my $git_commands = "git-upload-pack|git-receive-pack|git-upload-archive";
-    trace(1, "checking soc=\"$ENV{SSH_ORIGINAL_COMMAND}\" for verb in ($git_commands)");
+    trace(2, "checking soc=\"$ENV{SSH_ORIGINAL_COMMAND}\" for verb in ($git_commands)");
     if ( $ENV{SSH_ORIGINAL_COMMAND} =~ /(?:$git_commands) '\/?(\S+)'$/ ) {
         (my $repo = $1) =~ s/\.git$//;
-        trace(1, "got repo=$repo");
+        trace(2, "got repo=$repo");
 
         my $match_repo = option($repo, "match-repo");
         my @matches;
         if ($match_repo) {
-            trace(1, "got match-repo=$match_repo");
+            trace(2, "got match-repo=$match_repo");
             @matches = $repo =~ $match_repo;
-            trace(1, "got \@matches=(@matches)");
+            trace(2, "got \@matches=(@matches)");
             return unless @matches;
         }
 
         my $allow_hosts = git_config($repo, "^gitolite-options\\.allow-host([.-].*)?");
         my @allow_hosts = map {split} values %$allow_hosts;
-        trace(1, "got \@allow-hosts=(@allow_hosts)");
+        trace(2, "got \@allow-hosts=(@allow_hosts)");
 
         for my $allow (@allow_hosts) {
-            trace(1, "checking allow-host=$allow");
+            trace(2, "checking allow-host=$allow");
             if ($match_repo) {
                 my $tallow = $allow;
                 for my $i (0 .. $#matches) {
@@ -83,52 +83,52 @@ sub input {
                     my $to = $matches[$i];
                     $tallow =~ s/$from/$to/e;
                 }
-                trace(1, "allow-host=$allow translates to allow-host=$tallow");
+                trace(2, "allow-host=$allow translates to allow-host=$tallow");
                 $allow = $tallow;
             }
             if (__is_host($allow)) {
                 if ($allow =~ /^\./) {
                     # .domain match
-                    trace(1, "trying .domain match");
-                    if ($allow eq $clientdomain) {
+                    trace(2, "trying .domain match");
+                    if (lc $allow eq lc $clientdomain) {
                         gl_log("input", "host-based-auth", "clientdomain=$clientdomain matches with allow-host=$allow", "mapping $anon_user to $host_user");
                         __replace_user($host_user);
                         last;
                     } else {
-                        trace(1, "...not matched");
+                        trace(2, "...not matched");
                     }
                 } elsif ($allow =~ /\./) {
                     # host.domain match
-                    trace(1, "trying host.domain match");
-                    if ($allow eq $clienthost) {
+                    trace(2, "trying host.domain match");
+                    if (lc $allow eq lc $clienthost) {
                         gl_log("input", "host-based-auth", "clienthost=$clienthost matches with allow-host=$allow", "mapping $anon_user to $host_user");
                         __replace_user($host_user);
                         last;
                     } else {
-                        trace(1, "...not matched");
+                        trace(2, "...not matched");
                     }
                 } else {
                     # host match
-                    trace(1, "trying host match");
-                    if ($allow eq $clientname) {
+                    trace(2, "trying host match");
+                    if (lc $allow eq lc $clientname) {
                         gl_log("input", "host-based-auth", "clientname=$clientname matches with allow-host=$allow", "mapping $anon_user to $host_user");
                         __replace_user($host_user);
                         last;
                     } else {
-                        trace(1, "...not matched");
+                        trace(2, "...not matched");
                     }
                 }
             } elsif (my $allowip = new NetAddr::IP::Lite($allow)) {
                 # ip match
-                trace(1, "$allow translates to $allowip");
+                trace(2, "$allow translates to $allowip");
                 my $maskip = new NetAddr::IP::Lite($clientip, $allowip->mask());
-                trace(1, "trying ip match");
+                trace(2, "trying ip match");
                 if ($allowip->network() eq $maskip->network()) {
                     gl_log("input", "host-based-auth", "matched clientip=$clientip with allow-host=$allow", "mapping $anon_user to $host_user");
                     __replace_user($host_user);
                     last;
                 } else {
-                    trace(1, "...not matched");
+                    trace(2, "...not matched");
                 }
             }
         }

@@ -98,11 +98,10 @@ repo3 is writable from any address that reverse-resolve to HOSTNAME<.ANYDOMAIN>
         option allow-host = myhost.domain
     ~~~
 
-
-For each repo:
-* `anyhost` user must be authorized according to needed access
-* `allow-host` option define autorized host or IPs for which `anonhttp` is
-  replaced with `anyhost`
+* For each repo:
+    * `anyhost` user must be authorized according to needed access
+    * `allow-host` option define autorized host or IPs for which `anonhttp` is
+      replaced with `anyhost`
 
 ### anonhttp
 
@@ -127,9 +126,9 @@ hosts, domains, or hosts for which `anonhttp` is replaced with `anyhost`.
 
 Examples:
 ~~~
-option allow-host 10.11.12.13 192.168.1.50
-option allow-host-1 10.50.60.0/24
-option allow-host-2 hostname.domain .domain hostname
+option allow-host = 10.11.12.13 192.168.1.50
+option allow-host-1 = 10.50.60.0/24
+option allow-host-2 = hostname.domain .domain hostname
 ~~~
 You can have several allow-host options with a suffix '-anything', or you can
 have several space-separated values with a single option.

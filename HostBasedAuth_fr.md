@@ -133,9 +133,9 @@ sont autorisés à accéder au dépôt.
 
 Exemples:
 ~~~
-option allow-host 10.11.12.13 192.168.1.50
-option allow-host-1 10.50.60.0/24
-option allow-host-2 hostname.domain .domain hostname
+option allow-host = 10.11.12.13 192.168.1.50
+option allow-host-1 = 10.50.60.0/24
+option allow-host-2 = hostname.domain .domain hostname
 ~~~
 Cet exemple montre qu'il est possible de spécifier plusieurs lignes allow-host
 en les suffixant par '-qqchose'. Il est aussi possible de spécifier plusieurs

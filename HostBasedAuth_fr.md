@@ -26,7 +26,7 @@ repo repo1
 le dépôt est accessible:
 * en lecture depuis les adresses 10.11.12.13 et 10.11.12.14
 * en écriture depuis toute adresse ip dont la résolution inverse est
-  HOST.DOMAIN;
+  HOST.DOMAIN
 * en écriture depuis toute adresse ip dont la résolution inverse est un domaine
   dont le nom de base est HOSTNAME
 
@@ -128,9 +128,10 @@ option map-anonhttp = user from 10.11.12.13 192.168.1.50
 option map-anonhttp-1 = user from 10.50.60.0/24
 option map-anonhttp-2 = user from hostname.domain .domain hostname
 ~~~
-Cet exemple montre qu'il est possible de spécifier plusieurs lignes map-anonhttp
-en les suffixant par '-qqchose'. Il est aussi possible de spécifier plusieurs
-valeurs dans une même option en les séparant par des espaces.
+Cet exemple montre qu'il est possible de spécifier plusieurs fois l'option
+`map-anonhttp` en la suffixant par '-qqchose'. Il est aussi possible de
+spécifier plusieurs valeurs dans une même option en les séparant par des
+espaces.
 
 Les règles de correspondance sont:
 * correspondance exacte pour les adresses IP

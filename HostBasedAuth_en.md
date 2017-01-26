@@ -9,26 +9,28 @@ This trigger enable host based authentication. Host ip, name or fqdn can be used
 for authentication. This trigger is designed to be used in smart-http mode.
 
 For each repo:
-* `anyhost` user must be authorized
-* `allow-host` option define autorized host or IPs
-* if the repo is accessed anonymously with user `anonhttp` from authorized
-  hosts, then the user is replaced with `anyhost`
+* some specific users must be authorized (name doesn't matter)
+* for each of these users, an option define autorized hosts or IPs
+* if the repo is accessed anonymously with user `anonhttp` from an authorized
+  hosts, then the corresponding user is selected
 
 In the following example:
 ~~~
 repo repo1
-    R = anyhost
-    option allow-host = 10.11.12.13
-repo repo2
-    RW = anyhost
-    option allow-host = HOST.DOMAIN
-repo repo3
-    RW = anyhost
-    option allow-host = HOSTNAME
+    R = reader
+    RW = writer
+    RW+ = forcer
+    option map-anonhttp-1 = reader from 10.11.12.13 10.11.12.14
+    option map-anonhttp-2 = writer from HOST.DOMAIN
+    option map-anonhttp-3 = forcer from HOSTNAME
 ~~~
-repo1 is readable from address 10.11.12.13;
-repo2 is writable from any address that reverse-resolve to HOST.DOMAIN;
-repo3 is writable from any address that reverse-resolve to HOSTNAME<.ANYDOMAIN>
+the repo is:
+* readable from the addresses 10.11.12.13 and 10.11.12.14
+* writable from any address that reverse-resolve to HOST.DOMAIN
+* writable from any address that reverse-resolve to HOSTNAME<.ANYDOMAIN>
+
+It is not required to define users and mappings for reader, writer and enforcer
+privileges for each repo. This example is only to show that this is possible.
 
 ## Installation
 
@@ -71,12 +73,6 @@ repo3 is writable from any address that reverse-resolve to HOSTNAME<.ANYDOMAIN>
     INPUT => [
         'HostBasedAuth::input',
     ],
-
-    # Uncomment if customization is needed
-    #HOST_BASED_AUTH => {
-    #    ANON_USER => 'anonhttp',
-    #    HOST_USER => 'anyhost',
-    #},
     ~~~
 
 ## Configuration
@@ -94,14 +90,14 @@ repo3 is writable from any address that reverse-resolve to HOSTNAME<.ANYDOMAIN>
     ~~~
     repo myrepo
         R = daemon
-        RW+ = anyhost
-        option allow-host = myhost.domain
+        RW+ = writer
+        option map-anonhttp = writer from myhost.domain
     ~~~
 
 * For each repo:
-    * `anyhost` user must be authorized according to needed access
-    * `allow-host` option define autorized host or IPs for which `anonhttp` is
-      replaced with `anyhost`
+    * a user must be authorized according to needed access
+    * `map-anonhttp` option define autorized host or IPs for which `anonhttp` is
+      replaced with this user
 
 ### anonhttp
 
@@ -109,29 +105,26 @@ This user is used with anonymous http access. User is replaced only with an
 anonymous connexion. Indeed, if the connexion is already authenticated, it's
 uncesserary to authenticate further.
 
-Default value is `%RC{HOST_BASED_AUTH}{ANON_USER}` or `%RC{HTTP_ANON_USER}` or
-`anonhttp` in this order.
+Default value is `%RC{HTTP_ANON_USER}` or `anonhttp` in this order.
 
-### anyhost
+### option map-anonhttp
 
-This user have to be authorized on the repositories that support host based
-authorization.
-
-Default value is `%RC{HOST_BASED_AUTH}{HOST_USER}` or `anyhost` in this order.
-
-### option allow-host
-
-This option define a list of IP addresses, IP address class, fully qualified
-hosts, domains, or hosts for which `anonhttp` is replaced with `anyhost`.
+This option defines a mapping between a user and a list of IP addresses, IP
+address class, fully qualified hosts, domains, or hosts for which `anonhttp` is
+replaced with the user.
 
 Examples:
 ~~~
-option allow-host = 10.11.12.13 192.168.1.50
-option allow-host-1 = 10.50.60.0/24
-option allow-host-2 = hostname.domain .domain hostname
+option map-anonhttp = user from 10.11.12.13 192.168.1.50
+option map-anonhttp-1 = user from 10.50.60.0/24
+option map-anonhttp-2 = user from hostname.domain .domain hostname
 ~~~
-You can have several allow-host options with a suffix '-anything', or you can
+You can have several `map-anonhttp` options with a suffix '-anything', or you can
 have several space-separated values with a single option.
+
+Note: This design has been suggested by Sitaram Chamarty, with the option name
+`anonhttp-is`. However, I prefer the name `map-anonhttp`. The two names work the
+same.
 
 ### option match-repo
 
@@ -142,9 +135,9 @@ with numeric groups from the regex.
 Example:
 ~~~
 repo hosts/..*
-    RW+ = anyhost
+    RW+ = user
     option match-repo = hosts/([^/]+)/config
-    option allow-host = $1.domain
+    option map-anonhttp = user from $1.domain
 ~~~
 In this example, a repo named 'hosts/HOST/config' is accessible from the host
 'HOST.domain'

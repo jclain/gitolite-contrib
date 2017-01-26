@@ -5,28 +5,34 @@
 Ce trigger permet d'authentifier sur la base de l'adresse ip ou du nom de l'hôte
 qui fait la requête. Il est conçu pour fonctionner avec le mode d'accès http
 
-Le principe est le suivant: pour les dépôts concernés:
-* il faut autoriser l'utilisateur `anyhost`
-* définir des options pour la liste des hôtes ou des adresses IPs qui sont
-  autorisés
+Le principe est le suivant: pour chaque dépôt concerné:
+* il faut autoriser certains utilisateurs (le nom choisi importe peu)
+* pour chacun de ces utilisateurs, il faut définir une option pour la liste des
+  hôtes ou des adresses IPs à partir desquels ils sont autorisés
 * si l'accès est effectué en mode anonyme avec l'utilisateur `anonhttp` depuis
-  les hôtes spécifiés, alors l'utilisateur est traduit en `anyhost`
+  les hôtes spécifiés, alors l'utilisateur est traduit en fonction des règles
+  définies précédemment.
 
 Dans l'exemple suivant:
 ~~~
 repo repo1
-    R = anyhost
-    option allow-host = 10.11.12.13
-repo repo2
-    RW = anyhost
-    option allow-host = HOST.DOMAIN
-repo repo3
-    RW = anyhost
-    option allow-host = HOSTNAME
+    R = reader
+    RW = writer
+    RW+ = forcer
+    option map-anonhttp-1 = reader from 10.11.12.13 10.11.12.14
+    option map-anonhttp-2 = writer from HOST.DOMAIN
+    option map-anonhttp-3 = forcer from HOSTNAME
 ~~~
-le dépôt repo1 est accessible en lecture depuis l'adresse 10.11.12.13;
-le dépôt repo2 est accessible en écriture depuis toute adresse ip dont la résolution inverse est HOST.DOMAIN;
-le dépôt repo3 est accessible en écriture depuis toute adresse ip dont la résolution inverse est un domaine dont le nom de base est HOSTNAME
+le dépôt est accessible:
+* en lecture depuis les adresses 10.11.12.13 et 10.11.12.14
+* en écriture depuis toute adresse ip dont la résolution inverse est
+  HOST.DOMAIN;
+* en écriture depuis toute adresse ip dont la résolution inverse est un domaine
+  dont le nom de base est HOSTNAME
+
+Bien entendu, il n'est pas obligatoire de définir chacun des types d'accès pour
+le dépôt. L'exemple montre simplement qu'il est possible de définir des règles
+différentes en fonction de l'hôte qui fait la requête.
 
 ## Installation
 
@@ -73,12 +79,6 @@ le dépôt repo3 est accessible en écriture depuis toute adresse ip dont la ré
     INPUT => [
         'HostBasedAuth::input',
     ],
-
-    # Uncomment if customization is needed
-    #HOST_BASED_AUTH => {
-    #    ANON_USER => 'anonhttp',
-    #    HOST_USER => 'anyhost',
-    #},
     ~~~
 
 ## Configuration
@@ -96,15 +96,14 @@ le dépôt repo3 est accessible en écriture depuis toute adresse ip dont la ré
     ~~~
     repo myrepo
         R = daemon
-        RW+ = anyhost
-        option allow-host = myhost.domain
+        RW+ = writer
+        option map-anonhttp = writer from myhost.domain
     ~~~
 
-* Une fois que la condition précédente est remplie, tous les dépôts qui doivent
-  être autorisés sur la base de l'hôte doivent remplir au moins deux conditions:
-    * Autoriser le user `anyhost` en fonction des accès à fournir
-    * Définir l'option `allow-host` pour définir les hôtes pour lesquels le user
-      `anonhttp` est traduit en `anyhost`
+* Une fois que la condition précédente est remplie, tous les dépôts que l'on
+  veut autoriser sur la base de l'hôte doivent définir une correspondance
+  `map-anonhttp` entre un utilisateur autorisé et les hôtes pour lesquels le
+  user `anonhttp` doit être traduit.
 
 ### anonhttp
 
@@ -114,30 +113,22 @@ si la connexion est anonyme qu'une traduction du nom d'utilisateur est faite.
 En effet, on considère que si la connexion n'est pas anonyme, alors il n'est pas
 nécessaire d'authentifier plus encore.
 
-Par défaut, on prend la valeur de `%RC{HOST_BASED_AUTH}{ANON_USER}`, sinon la
-valeur de `%RC{HTTP_ANON_USER}`, sinon la valeur `anonhttp`
+Par défaut, on prend la valeur de `%RC{HTTP_ANON_USER}`, sinon `anonhttp`
 
-### anyhost
+### option map-anonhttp
 
-Ce user est celui qui doit recevoir les autorisation sur les dépôts.
-
-Par défaut, on prend la valeur de `%RC{HOST_BASED_AUTH}{HOST_USER}`, sinon la
-valeur `anyhost`.
-
-### option allow-host
-
-Cette option permet de définir une liste d'adresses IP, de classes d'adresses
-IP, de noms d'hôtes pleinement qualifiés, de domaines ou de noms d'hôtes pour
-lequels la traduction `anonhttp --> anyhost` est effectuée, c'est à dire qui
-sont autorisés à accéder au dépôt.
+Cette option permet de définir une correspondance entre un nom d'utilisateur et
+une liste d'adresses IP, de classes d'adresses IP, de noms d'hôtes pleinement
+qualifiés, de domaines ou de noms d'hôtes pour lequels la traduction est
+effectuée, c'est à dire qui sont autorisés à accéder au dépôt.
 
 Exemples:
 ~~~
-option allow-host = 10.11.12.13 192.168.1.50
-option allow-host-1 = 10.50.60.0/24
-option allow-host-2 = hostname.domain .domain hostname
+option map-anonhttp = user from 10.11.12.13 192.168.1.50
+option map-anonhttp-1 = user from 10.50.60.0/24
+option map-anonhttp-2 = user from hostname.domain .domain hostname
 ~~~
-Cet exemple montre qu'il est possible de spécifier plusieurs lignes allow-host
+Cet exemple montre qu'il est possible de spécifier plusieurs lignes map-anonhttp
 en les suffixant par '-qqchose'. Il est aussi possible de spécifier plusieurs
 valeurs dans une même option en les séparant par des espaces.
 
@@ -146,20 +137,25 @@ Les règles de correspondance sont:
 * correspondance exacte de réseau pour la notation CIDR
 * correspondance exacte insensible à la casse pour les domaines
 
+Note: cette implémentation fait suite à une suggestion de Sitaram Chamarty. Il
+avait à l'origine proposé comme nom d'option `anonhttp-is` mais j'ai une
+préférence pour `map-anonhttp`. Pour lui faire honneur, les deux noms sont
+valides.
+
 ### option match-repo
 
 Cette option permet de faire des correspondance d'hôte sur la base du nom du
 dépôt. Tout d'abord, le nom du dépôt est mis en correspondance avec l'expression
-régulière de l'option `match-repo`. Si une correspondance est trouvée, alors le
-nom d'hôte est construit à partir des groupes de correspondances numériques
+régulière de l'option `match-repo`. Si une correspondance est trouvée, alors
+le nom d'hôte est construit à partir des groupes de correspondances numériques
 trouvés sur le nom du dépôt.
 
 Un exemple sera sans doute plus parlant:
 ~~~
 repo hosts/..*
-    RW+ = anyhost
+    RW+ = user
     option match-repo = hosts/([^/]+)/config
-    option allow-host = $1.domain
+    option map-anonhttp = user from $1.domain
 ~~~
 Dans cet exemple, les dépôts de la forme 'hosts/HOST/config' sont accessibles et
 modifiables depuis les hôtes 'HOST.domain'

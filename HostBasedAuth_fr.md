@@ -34,6 +34,29 @@ Bien entendu, il n'est pas obligatoire de définir chacun des types d'accès pou
 le dépôt. L'exemple montre simplement qu'il est possible de définir des règles
 différentes en fonction de l'hôte qui fait la requête.
 
+Les verbes supportés sont la commande create (pour les dépôts de type wild) et
+tous ceux associés aux commandes git (git-upload-pack, git-receive-pack,
+git-upload-archive). Voici un exemple complet:
+
+Pour la configuration suivante:
+~~~
+# gitolite.conf
+repo hba/.*
+    C = user
+    RW+ = user
+    option.map-anonhttp = user from myhost
+~~~
+Les commandes suivantes permettent depuis myhost de créer un dépôt sur le
+serveur myrepos, de le cloner puis de faire le commit initial:
+~~~
+# on myhost
+curl -fs http://myrepos/anongit/create?hba/test
+git clone http://myrepos/anongit/hba/test
+cd test
+touch .gitignore
+git commit -am "initial"
+~~~
+
 ## Installation
 
 * Ce trigger utilise NetAddr::IP. Sur debian jessie, il est possible de

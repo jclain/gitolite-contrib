@@ -45,6 +45,95 @@ sub __map_user {
     $ARGV[0] = $user;
 }
 
+sub process_repo {
+    my ($anon_user, $user, $clientip, $clienthost, $clientname, $clientdomain, $repo) = @_;
+
+    my $match_repo = option($repo, "match-repo");
+    my @matches;
+    if ($match_repo) {
+        T "got option \"match-repo = $match_repo\", trying to match...";
+        @matches = $repo =~ $match_repo;
+        T "got \@matches=(@matches)";
+        return unless @matches;
+    }
+
+    my $map_anonhttps = git_config($repo, "^gitolite-options\\.(map-anonhttp|anonhttp-is)([.-].*)?");
+    while (my ($option, $map_anonhttp) = each(%$map_anonhttps)) {
+        T "parsing option \"$option = $map_anonhttp\"";
+        my ($to_user, $from_hosts) = $map_anonhttp =~ /^(\S+)\s*from\s*(.+)$/
+            or log_die("malformed option", "syntax is \"user from hosts...\"");
+        $to_user =~ $USERNAME_PATT
+            or log_die("malformed option", "invalid user '$to_user'");
+        T "got to_user=$to_user";
+        my @from_hosts = split(' ', $from_hosts);
+        T "got \@from_hosts=(@from_hosts)";
+
+        for my $from_host (@from_hosts) {
+            T "checking from_host=$from_host";
+            if ($match_repo) {
+                my $thost = $from_host;
+                for my $i (0 .. $#matches) {
+                    my $from = '\$'.($i + 1);
+                    my $to = $matches[$i];
+                    $thost =~ s/$from/$to/e;
+                }
+                T "from_host=$from_host translates to from_host=$thost";
+                $from_host = $thost;
+            }
+
+            if (__is_host($from_host)) {
+                if ($from_host =~ /^\./) {
+                    # .domain match
+                    T "trying .domain match";
+                    if (lc $from_host eq lc $clientdomain) {
+                        log_info("clientdomain=$clientdomain matches with from_host=$from_host", "mapping $anon_user to $to_user");
+                        __map_user($to_user);
+                        last;
+                    } else {
+                        T "...not matched";
+                    }
+
+                } elsif ($from_host =~ /\./) {
+                    # host.domain match
+                    T "trying host.domain match";
+                    if (lc $from_host eq lc $clienthost) {
+                        log_info("clienthost=$clienthost matches with from_host=$from_host", "mapping $anon_user to $to_user");
+                        __map_user($to_user);
+                        last;
+                    } else {
+                        T "...not matched";
+                    }
+
+                } else {
+                    # host match
+                    T "trying host match";
+                    if (lc $from_host eq lc $clientname) {
+                        log_info("clientname=$clientname matches with from_host=$from_host", "mapping $anon_user to $to_user");
+                        __map_user($to_user);
+                        last;
+                    } else {
+                        T "...not matched";
+                    }
+                }
+
+            } elsif (my $from_hostip = new NetAddr::IP::Lite($from_host)) {
+                # ip match
+                T "$from_host translates to $from_hostip";
+                my $maskip = new NetAddr::IP::Lite($clientip, $from_hostip->mask());
+
+                T "trying ip match";
+                if ($from_hostip->network() eq $maskip->network()) {
+                    log_info("matched clientip=$clientip with from_host=$from_host", "mapping $anon_user to $to_user");
+                    __map_user($to_user);
+                    last;
+                } else {
+                    T "...not matched";
+                }
+            }
+        }
+    }
+}
+
 sub input {
     my $anon_user = $rc{HTTP_ANON_USER} || 'anonhttp';
 
@@ -65,97 +154,24 @@ sub input {
     (my $clientdomain = $clienthost) =~ s/^[^.]+//;
     T "clientip=$clientip resolves to clienthost=$clienthost";
 
+    my @args = ($anon_user, $user, $clientip, $clienthost, $clientname, $clientdomain);
+
     # check verb
     my $git_commands = "git-upload-pack|git-receive-pack|git-upload-archive";
-    T "checking soc=\"$ENV{SSH_ORIGINAL_COMMAND}\" for verb in ($git_commands)";
-    if ( $ENV{SSH_ORIGINAL_COMMAND} =~ /(?:$git_commands) '\/?(\S+)'$/ ) {
-        (my $repo = $1) =~ s/\.git$//;
-        T "got repo=$repo";
+    my $create_command = "create";
+    T "checking soc=\"$ENV{SSH_ORIGINAL_COMMAND}\" for verb in ($git_commands|$create_command)";
+    if ( $ENV{SSH_ORIGINAL_COMMAND} =~ /($git_commands) '\/?(\S+)'$/ ) {
+        my $command = $1;
+        (my $repo = $2) =~ s/\.git$//;
+        T "got repo=$repo with verb $command";
 
-        my $match_repo = option($repo, "match-repo");
-        my @matches;
-        if ($match_repo) {
-            T "got option \"match-repo = $match_repo\", trying to match...";
-            @matches = $repo =~ $match_repo;
-            T "got \@matches=(@matches)";
-            return unless @matches;
-        }
+        process_repo @args, $repo;
+    } elsif ( $ENV{SSH_ORIGINAL_COMMAND} =~ /($create_command) \/?(\S+)$/ ) {
+        my $command = $1;
+        (my $repo = $2) =~ s/\.git$//;
+        T "got repo=$repo with verb $command";
 
-        my $map_anonhttps = git_config($repo, "^gitolite-options\\.(map-anonhttp|anonhttp-is)([.-].*)?");
-        while (my ($option, $map_anonhttp) = each(%$map_anonhttps)) {
-            T "parsing option \"$option = $map_anonhttp\"";
-            my ($to_user, $from_hosts) = $map_anonhttp =~ /^(\S+)\s*from\s*(.+)$/
-                or log_die("malformed option", "syntax is \"user from hosts...\"");
-            $to_user =~ $USERNAME_PATT
-                or log_die("malformed option", "invalid user '$to_user'");
-            T "got to_user=$to_user";
-            my @from_hosts = split(' ', $from_hosts);
-            T "got \@from_hosts=(@from_hosts)";
-
-            for my $from_host (@from_hosts) {
-                T "checking from_host=$from_host";
-                if ($match_repo) {
-                    my $thost = $from_host;
-                    for my $i (0 .. $#matches) {
-                        my $from = '\$'.($i + 1);
-                        my $to = $matches[$i];
-                        $thost =~ s/$from/$to/e;
-                    }
-                    T "from_host=$from_host translates to from_host=$thost";
-                    $from_host = $thost;
-                }
-
-                if (__is_host($from_host)) {
-                    if ($from_host =~ /^\./) {
-                        # .domain match
-                        T "trying .domain match";
-                        if (lc $from_host eq lc $clientdomain) {
-                            log_info("clientdomain=$clientdomain matches with from_host=$from_host", "mapping $anon_user to $to_user");
-                            __map_user($to_user);
-                            last;
-                        } else {
-                            T "...not matched";
-                        }
-
-                    } elsif ($from_host =~ /\./) {
-                        # host.domain match
-                        T "trying host.domain match";
-                        if (lc $from_host eq lc $clienthost) {
-                            log_info("clienthost=$clienthost matches with from_host=$from_host", "mapping $anon_user to $to_user");
-                            __map_user($to_user);
-                            last;
-                        } else {
-                            T "...not matched";
-                        }
-
-                    } else {
-                        # host match
-                        T "trying host match";
-                        if (lc $from_host eq lc $clientname) {
-                            log_info("clientname=$clientname matches with from_host=$from_host", "mapping $anon_user to $to_user");
-                            __map_user($to_user);
-                            last;
-                        } else {
-                            T "...not matched";
-                        }
-                    }
-
-                } elsif (my $from_hostip = new NetAddr::IP::Lite($from_host)) {
-                    # ip match
-                    T "$from_host translates to $from_hostip";
-                    my $maskip = new NetAddr::IP::Lite($clientip, $from_hostip->mask());
-
-                    T "trying ip match";
-                    if ($from_hostip->network() eq $maskip->network()) {
-                        log_info("matched clientip=$clientip with from_host=$from_host", "mapping $anon_user to $to_user");
-                        __map_user($to_user);
-                        last;
-                    } else {
-                        T "...not matched";
-                    }
-                }
-            }
-        }
+        process_repo @args, $repo;
     }
 }
 

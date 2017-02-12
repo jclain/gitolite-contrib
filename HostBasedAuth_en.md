@@ -32,6 +32,29 @@ the repo is:
 It is not required to define users and mappings for reader, writer and enforcer
 privileges for each repo. This example is only to show that this is possible.
 
+The gitolite verb create (used to create wild-repos) and those associate with
+git commands (git-upload-pack, git-receive-pack, git-upload-archive) are all
+supported. Here is a complete example:
+
+With the following configuration:
+~~~
+# gitolite.conf
+repo hba/.*
+    C = user
+    RW+ = user
+    option.map-anonhttp = user from myhost
+~~~
+The following commands create a new repo from myhost on myrepos, clone it and
+then commit a file:
+~~~
+# on myhost
+curl -fs http://myrepos/anongit/create?hba/test
+git clone http://myrepos/anongit/hba/test
+cd test
+touch .gitignore
+git commit -am "initial"
+~~~
+
 ## Installation
 
 * NetAddr::IP is required. On debian jessie, it can be installed with

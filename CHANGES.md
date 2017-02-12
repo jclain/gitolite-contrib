@@ -5,7 +5,7 @@
 ## Version 0.1.0 du 12/02/2017-11:34
 
 * `2b5530b` Intégration de la branche sitaramc-design
-* `80bd8ab` support des syntaxes *.domain et hostname.*
+* `80bd8ab` support des syntaxes `*.domain` et `hostname.*`
 * `5077158` support de la commande create
 * `b63207c` support de l'installation dans un dépôt gitolite-admin
 * `45c7e82` ajout d'une liste de tâches

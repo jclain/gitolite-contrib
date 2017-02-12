@@ -1,3 +1,7 @@
+## Version 0.1.1 du 12/02/2017-11:40
+
+* `1f1af8d` désactiver la trace pour la production
+
 ## Version 0.1.0 du 12/02/2017-11:34
 
 * `2b5530b` Intégration de la branche sitaramc-design

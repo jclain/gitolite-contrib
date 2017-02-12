@@ -1,3 +1,7 @@
+## Version 0.1.2 du 12/02/2017-11:48
+
+* `ec93579` bug avec install --help
+
 ## Version 0.1.1 du 12/02/2017-11:40
 
 * `1f1af8d` désactiver la trace pour la production

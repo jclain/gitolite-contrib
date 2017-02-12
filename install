@@ -15,6 +15,7 @@ localdir est le répertoire LOCAL_CODE configuré dans gitolite.rc
 
 Si l'utilisateur courant est l'utilisateur gitolite, alors cette valeur est
 calculée automatiquement."
+    exit 0
 fi
 
 localdir="$1"

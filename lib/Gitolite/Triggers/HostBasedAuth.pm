@@ -82,6 +82,8 @@ sub process_repo {
             }
 
             if (__is_host($from_host)) {
+                $from_host =~ s/^\*\././;          # *.domain   === .domain
+                $from_host =~ s/^([^.]+)\.\*$/$1/; # hostname.* === hostname
                 if ($from_host =~ /^\./) {
                     # .domain match
                     T "trying .domain match";

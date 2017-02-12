@@ -146,8 +146,11 @@ You can have several `map-anonhttp` options with a suffix '-anything', or you ca
 have several space-separated values with a single option.
 
 Note: This design has been suggested by Sitaram Chamarty, with the option name
-`anonhttp-is`. However, I prefer the name `map-anonhttp`. The two names work the
-same.
+`anonhttp-is`. However, I prefer the name `map-anonhttp`. The two names are
+valid and supported.
+
+Note: The syntaxes `*.domain` and `hostname.*` are also supported and are
+equivalent to `.domain` and `hostname`, respectively
 
 ### option match-repo
 

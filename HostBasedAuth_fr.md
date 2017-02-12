@@ -166,6 +166,9 @@ avait à l'origine proposé comme nom d'option `anonhttp-is` mais j'ai une
 préférence pour `map-anonhttp`. Pour lui faire honneur, les deux noms sont
 valides.
 
+Note: pour les nom d'hôte et de domaine, les syntaxes `*.domain` et `hostname.*`
+sont supportées et sont équivalentes respectivement à `.domain` et `hostname`
+
 ### option match-repo
 
 Cette option permet de faire des correspondance d'hôte sur la base du nom du

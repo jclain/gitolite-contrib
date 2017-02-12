@@ -2,14 +2,43 @@
 # -*- coding: utf-8 mode: sh -*- vim:sw=4:sts=4:et:ai:si:sta:fenc=utf-8
 
 scriptdir="$(cd "$(dirname -- "$0")"; pwd)"
+scriptname="$(basename -- "$0")"
 function die() { [ $# -gt 0 ] && echo "ERROR: $*" 1>&2; exit 1; }
 
-localdir="$(gitolite query-rc LOCAL_CODE 2>/dev/null)"
-[ -n "$localdir" ] || die "LOCAL_DIR not defined"
-[ -d "$localdir" ] || {
-    echo "Creating directory $localdir..."
-    mkdir -p "$localdir" || die
-}
+if [ $# -eq 1 -a "$1" == --help ]; then
+    echo "$scriptname: installer dans le répertoire LOCAL_CODE de gitolite
 
-echo "Copying files..."
+USAGE
+    $scriptname [localdir]
+
+localdir est le répertoire LOCAL_CODE configuré dans gitolite.rc
+
+Si l'utilisateur courant est l'utilisateur gitolite, alors cette valeur est
+calculée automatiquement."
+fi
+
+localdir="$1"
+if [ -n "$localdir" ]; then
+    if [ -f "$localdir/conf/gitolite.conf" -a -d "$localdir/localcode" ]; then
+        echo "* script argument is a gitolite-admin repo"
+        localdir="$localdir/localcode"
+    else
+        echo "* using script argument as-is"
+    fi
+    [ -d "$localdir" ] || die "$localdir: not found"
+elif [ -f conf/gitolite.conf -a -d localcode ]; then
+    echo "* current dir is a gitolite-admin repo"
+    localdir=localcode
+else
+    echo "* asking gitolite for LOCAL_CODE"
+    localdir="$(gitolite query-rc LOCAL_CODE 2>/dev/null)"
+    [ -n "$localdir" ] || die "LOCAL_CODE not defined"
+    [ -d "$localdir" ] || {
+        echo "* Creating directory $localdir..."
+        mkdir -p "$localdir" || die
+    }
+fi
+echo "* Actual installation to $localdir"
+
+echo "* Copying files..."
 rsync -r "$scriptdir/lib" "$localdir"

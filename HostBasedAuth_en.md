@@ -26,13 +26,13 @@ repo repo1
 ~~~
 the repo is:
 * readable from the addresses 10.11.12.13 and 10.11.12.14
-* writable from any address that reverse-resolve to HOST.DOMAIN
-* writable from any address that reverse-resolve to HOSTNAME<.ANYDOMAIN>
+* writable from any address that reverse-resolves to HOST.DOMAIN
+* writable from any address that reverse-resolves to HOSTNAME<.ANYDOMAIN>
 
-It is not required to define users and mappings for reader, writer and enforcer
+You need not define users and mappings for reader, writer and enforcer
 privileges for each repo. This example is only to show that this is possible.
 
-The gitolite verb create (used to create wild-repos) and those associate with
+The gitolite verb 'create' (used to create wild-repos) and those associate with
 git commands (git-upload-pack, git-receive-pack, git-upload-archive) are all
 supported. Here is a complete example:
 
@@ -118,8 +118,8 @@ git commit -am "initial"
     ~~~
 
 * For each repo:
-    * a user must be authorized according to needed access
-    * `map-anonhttp` option defines a autorized hosts or IPs for which `anonhttp` is
+    * a user must be authorized according to their needed access
+    * The `map-anonhttp` option defines autorized hosts or IPs for which `anonhttp` is
       replaced with this user
 
 ### anonhttp
@@ -132,8 +132,8 @@ The default value is `%RC{HTTP_ANON_USER}` or `anonhttp` in this order.
 
 ### option map-anonhttp
 
-This option defines a mapping between a user and a list of IP addresses, IP
-address class, fully qualified hosts, domains, or hosts for which `anonhttp` is
+This option defines a mapping between a user and a list of IP addresses, fully 
+qualified hosts, domains, or hosts; or an IP address classs for which `anonhttp` is
 replaced with the user.
 
 Examples:
@@ -154,9 +154,10 @@ equivalent to `.domain` and `hostname`, respectively.
 
 ### option match-repo
 
-This option matches a host based on the name of the repo. First, the
-repo name is matched with the match-repo regex. If successful, the host is built
-from capture groups from the regex.
+This option matches a host based on the name of the repo. It must be used in 
+conjunction with 'map-anonhttp'. First, the repo name is matched with the 
+match-repo regex. The host is built from capture groups from the regex and
+can be used in subsequent 'map-anonhttp' options.
 
 Example:
 ~~~

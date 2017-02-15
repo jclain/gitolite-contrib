@@ -5,12 +5,12 @@ translate afterwards. This file may not be up to date wrt the french one.
 
 # HostBasedAuth trigger
 
-This trigger enable host based authentication. Host ip, name or fqdn can be used
+This trigger enables host based authentication. Host ip, name or fqdn can be used
 for authentication. This trigger is designed to be used in smart-http mode.
 
 For each repo:
 * some specific users must be authorized (name doesn't matter)
-* for each of these users, an option define autorized hosts or IPs
+* for each of these users, an option defines autorized hosts or IPs
 * if the repo is accessed anonymously with user `anonhttp` from an authorized
   hosts, then the corresponding user is selected
 
@@ -101,7 +101,7 @@ git commit -am "initial"
 ## Configuration
 
 * IMPORTANT: in smart-http mode, you have to authorize the user `daemon` for all
-  relevant repository, e.g
+  relevant repositories, e.g
     ~~~
     repo gitolite-admin
         - = daemon
@@ -119,16 +119,16 @@ git commit -am "initial"
 
 * For each repo:
     * a user must be authorized according to needed access
-    * `map-anonhttp` option define autorized host or IPs for which `anonhttp` is
+    * `map-anonhttp` option defines a autorized hosts or IPs for which `anonhttp` is
       replaced with this user
 
 ### anonhttp
 
-This user is used with anonymous http access. User is replaced only with an
+This user is used with anonymous http access. The user is replaced only with an
 anonymous connexion. Indeed, if the connexion is already authenticated, it's
 uncesserary to authenticate further.
 
-Default value is `%RC{HTTP_ANON_USER}` or `anonhttp` in this order.
+The default value is `%RC{HTTP_ANON_USER}` or `anonhttp` in this order.
 
 ### option map-anonhttp
 
@@ -150,13 +150,13 @@ Note: This design has been suggested by Sitaram Chamarty, with the option name
 valid and supported.
 
 Note: The syntaxes `*.domain` and `hostname.*` are also supported and are
-equivalent to `.domain` and `hostname`, respectively
+equivalent to `.domain` and `hostname`, respectively.
 
 ### option match-repo
 
-This option allows to match an host based on the name of the repo. First, the
+This option matches a host based on the name of the repo. First, the
 repo name is matched with the match-repo regex. If successful, the host is built
-with numeric groups from the regex.
+from capture groups from the regex.
 
 Example:
 ~~~

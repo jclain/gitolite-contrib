@@ -10,8 +10,10 @@ Le principe est le suivant: pour chaque dépôt concerné:
 * pour chacun de ces utilisateurs, il faut définir une option pour la liste des
   hôtes ou des adresses IPs à partir desquels ils sont autorisés
 * si l'accès est effectué en mode anonyme avec l'utilisateur `anonhttp` depuis
-  les hôtes spécifiés, alors l'utilisateur est traduit en fonction des règles
-  définies précédemment.
+  les hôtes spécifiés, alors l'utilisateur effectif est modifié en fonction des
+  règles définies précédemment. Notez que le nouvel utilisateur n'hérite pas des
+  droits de l'utilisateur anonyme, même si l'utilisateur anonyme avait en
+  définitive plus de droits.
 
 Dans l'exemple suivant:
 ~~~
@@ -132,7 +134,6 @@ git commit -am "initial"
 
 Ce user est celui qui identifie les connexions http anonymes. C'est uniquement
 si la connexion est anonyme qu'une traduction du nom d'utilisateur est faite.
-
 En effet, on considère que si la connexion n'est pas anonyme, alors il n'est pas
 nécessaire d'authentifier plus encore.
 

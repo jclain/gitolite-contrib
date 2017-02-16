@@ -15,7 +15,9 @@ For each repo:
 * some specific users must be authorized (name doesn't matter)
 * for each of these users, an option defines autorized hosts or IPs
 * if the repo is accessed anonymously with user `anonhttp` from an authorized
-  hosts, then the corresponding user is selected
+  host, then the user corresponding to that host is selected as the new
+  effective user. Note: that user doesn't inherit the privileges of the
+  anonymous user, even if the anonymous user's privileges are higher.
 
 In the following example:
 ~~~
@@ -35,7 +37,7 @@ the repo is:
 You need not define users and mappings for reader, writer and enforcer
 privileges for each repo. This example is only to show that this is possible.
 
-The gitolite verb 'create' (used to create wild-repos) and those associate with
+The gitolite verb 'create' (used to create wild-repos) and those associated with
 git commands (git-upload-pack, git-receive-pack, git-upload-archive) are all
 supported. Here is a complete example:
 

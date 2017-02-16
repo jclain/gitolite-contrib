@@ -3,6 +3,9 @@
 note: english is not my native language. I write in french and then try to
 translate afterwards. This file may not be up to date wrt the french one.
 
+I'd like to thanks [Stephen Morton](https://github.com/stephencmorton) for his
+help with the translation of this file.
+
 # HostBasedAuth trigger
 
 This trigger enables host based authentication. Host ip, name or fqdn can be used
@@ -132,7 +135,7 @@ The default value is `%RC{HTTP_ANON_USER}` or `anonhttp` in this order.
 
 ### option map-anonhttp
 
-This option defines a mapping between a user and a list of IP addresses, fully 
+This option defines a mapping between a user and a list of IP addresses, fully
 qualified hosts, domains, or hosts; or an IP address classs for which `anonhttp` is
 replaced with the user.
 
@@ -154,8 +157,8 @@ equivalent to `.domain` and `hostname`, respectively.
 
 ### option match-repo
 
-This option matches a host based on the name of the repo. It must be used in 
-conjunction with 'map-anonhttp'. First, the repo name is matched with the 
+This option matches a host based on the name of the repo. It must be used in
+conjunction with 'map-anonhttp'. First, the repo name is matched with the
 match-repo regex. The host is built from capture groups from the regex and
 can be used in subsequent 'map-anonhttp' options.
 

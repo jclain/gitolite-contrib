@@ -1,3 +1,7 @@
+## Version 0.2.1 du 17/02/2017-00:12
+
+* `c03114e` Maj de la doc: clarifier le fait que le changement d'utilisateur peut induire une perte de droits effectifs
+
 ## Version 0.2.0 du 16/02/2017-20:27
 
 * `4ee94fc` Intégration de la branche stephencmorton-master

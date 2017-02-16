@@ -3,8 +3,8 @@
 * `4ee94fc` Intégration de la branche stephencmorton-master
   * `50d0fe0` quick fixes
   * `e2de6ce` Merge branch 'master' of https://github.com/stephencmorton/gitolite-contrib into stephencmorton-master
-  * `84fc8fe` Update HostBasedAuth_en.md
-  * `7060fbf` Quick grammar changes to HostBasedAuth_en.md
+  * `84fc8fe` Update `HostBasedAuth_en.md`
+  * `7060fbf` Quick grammar changes to `HostBasedAuth_en.md`
 
 ## Version 0.1.2 du 12/02/2017-11:48
 

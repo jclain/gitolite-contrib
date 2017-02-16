@@ -3,14 +3,17 @@
 note: english is not my native language. I write in french and then try to
 translate afterwards. This file may not be up to date wrt the french one.
 
+I'd like to thanks [Stephen Morton](https://github.com/stephencmorton) for his
+help with the translation of this file.
+
 # HostBasedAuth trigger
 
-This trigger enable host based authentication. Host ip, name or fqdn can be used
+This trigger enables host based authentication. Host ip, name or fqdn can be used
 for authentication. This trigger is designed to be used in smart-http mode.
 
 For each repo:
 * some specific users must be authorized (name doesn't matter)
-* for each of these users, an option define autorized hosts or IPs
+* for each of these users, an option defines autorized hosts or IPs
 * if the repo is accessed anonymously with user `anonhttp` from an authorized
   hosts, then the corresponding user is selected
 
@@ -26,13 +29,13 @@ repo repo1
 ~~~
 the repo is:
 * readable from the addresses 10.11.12.13 and 10.11.12.14
-* writable from any address that reverse-resolve to HOST.DOMAIN
-* writable from any address that reverse-resolve to HOSTNAME<.ANYDOMAIN>
+* writable from any address that reverse-resolves to HOST.DOMAIN
+* writable from any address that reverse-resolves to HOSTNAME<.ANYDOMAIN>
 
-It is not required to define users and mappings for reader, writer and enforcer
+You need not define users and mappings for reader, writer and enforcer
 privileges for each repo. This example is only to show that this is possible.
 
-The gitolite verb create (used to create wild-repos) and those associate with
+The gitolite verb 'create' (used to create wild-repos) and those associate with
 git commands (git-upload-pack, git-receive-pack, git-upload-archive) are all
 supported. Here is a complete example:
 
@@ -101,7 +104,7 @@ git commit -am "initial"
 ## Configuration
 
 * IMPORTANT: in smart-http mode, you have to authorize the user `daemon` for all
-  relevant repository, e.g
+  relevant repositories, e.g
     ~~~
     repo gitolite-admin
         - = daemon
@@ -118,22 +121,22 @@ git commit -am "initial"
     ~~~
 
 * For each repo:
-    * a user must be authorized according to needed access
-    * `map-anonhttp` option define autorized host or IPs for which `anonhttp` is
+    * a user must be authorized according to their needed access
+    * The `map-anonhttp` option defines autorized hosts or IPs for which `anonhttp` is
       replaced with this user
 
 ### anonhttp
 
-This user is used with anonymous http access. User is replaced only with an
+This user is used with anonymous http access. The user is replaced only with an
 anonymous connexion. Indeed, if the connexion is already authenticated, it's
 uncesserary to authenticate further.
 
-Default value is `%RC{HTTP_ANON_USER}` or `anonhttp` in this order.
+The default value is `%RC{HTTP_ANON_USER}` or `anonhttp` in this order.
 
 ### option map-anonhttp
 
-This option defines a mapping between a user and a list of IP addresses, IP
-address class, fully qualified hosts, domains, or hosts for which `anonhttp` is
+This option defines a mapping between a user and a list of IP addresses, fully
+qualified hosts, domains, or hosts; or an IP address classs for which `anonhttp` is
 replaced with the user.
 
 Examples:
@@ -150,13 +153,14 @@ Note: This design has been suggested by Sitaram Chamarty, with the option name
 valid and supported.
 
 Note: The syntaxes `*.domain` and `hostname.*` are also supported and are
-equivalent to `.domain` and `hostname`, respectively
+equivalent to `.domain` and `hostname`, respectively.
 
 ### option match-repo
 
-This option allows to match an host based on the name of the repo. First, the
-repo name is matched with the match-repo regex. If successful, the host is built
-with numeric groups from the regex.
+This option matches a host based on the name of the repo. It must be used in
+conjunction with 'map-anonhttp'. First, the repo name is matched with the
+match-repo regex. The host is built from capture groups from the regex and
+can be used in subsequent 'map-anonhttp' options.
 
 Example:
 ~~~

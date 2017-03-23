@@ -44,7 +44,7 @@ supported. Here is a complete example:
 With the following configuration:
 ~~~
 # gitolite.conf
-repo hba/.*
+repo hba/..*
     C = user
     RW+ = user
     option.map-anonhttp = user from myhost

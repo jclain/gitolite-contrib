@@ -43,7 +43,7 @@ git-upload-archive). Voici un exemple complet:
 Pour la configuration suivante:
 ~~~
 # gitolite.conf
-repo hba/.*
+repo hba/..*
     C = user
     RW+ = user
     option.map-anonhttp = user from myhost
@@ -109,7 +109,7 @@ git commit -am "initial"
 ## Configuration
 
 * IMPORTANT: comme il s'agit d'un accès par http, il faut autoriser l'accès au
-  user `daemon` pour tous les dépôt concerncés, e.g
+  user `daemon` pour tous les dépôt concernés, e.g
     ~~~
     repo gitolite-admin
         - = daemon

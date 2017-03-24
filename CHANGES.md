@@ -1,3 +1,8 @@
+## Version 0.2.2 du 24/03/2017-14:36
+
+* `6cbba19` maj doc sur l'utilisation des regex avec match-repo
+* `34035d5` quelques corrections sur la doc
+
 ## Version 0.2.1 du 17/02/2017-00:12
 
 * `c03114e` Maj de la doc: clarifier le fait que le changement d'utilisateur peut induire une perte de droits effectifs

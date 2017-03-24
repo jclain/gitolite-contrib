@@ -1,0 +1,23 @@
+/* -*- coding: utf-8 mode: css -*- vim:sw=4:sts=4:et:ai:si:sta:fenc=utf-8
+*/@CHARSET "utf-8";
+
+.gitolite-conf { background-color: lightyellow; }
+.gitolite-conf::before { content: "gitolite.conf"; }
+.gitolite-rc { background-color: lightblue; }
+.gitolite-rc::before { content: "gitolite.rc"; }
+
+.console { background-color: black; color: lightgreen; }
+
+.perl { background-color: lightpink; }
+
+.gitolite-conf::before
+,.gitolite-rc::before
+,.console::before
+,.perl::before
+{
+  display: block;
+  background: black;
+  color: white;
+  padding-left: 1em;
+  position: relative; left: -0.5em; top: -0.5em;
+}

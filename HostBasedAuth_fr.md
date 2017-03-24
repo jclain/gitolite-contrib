@@ -16,7 +16,7 @@ Le principe est le suivant: pour chaque dépôt concerné:
   définitive plus de droits.
 
 Dans l'exemple suivant:
-~~~
+~~~.gitolite-conf
 repo repo1
     R = reader
     RW = writer
@@ -41,8 +41,7 @@ tous ceux associés aux commandes git (git-upload-pack, git-receive-pack,
 git-upload-archive). Voici un exemple complet:
 
 Pour la configuration suivante:
-~~~
-# gitolite.conf
+~~~.gitolite-conf
 repo hba/..*
     C = user
     RW+ = user
@@ -50,7 +49,7 @@ repo hba/..*
 ~~~
 Les commandes suivantes permettent depuis myhost de créer un dépôt sur le
 serveur myrepos, de le cloner puis de faire le commit initial:
-~~~
+~~~.console
 # on myhost
 curl -fs http://myrepos/anongit/create?hba/test
 git clone http://myrepos/anongit/hba/test
@@ -63,34 +62,34 @@ git commit -am "initial"
 
 * Ce trigger utilise NetAddr::IP. Sur debian jessie, il est possible de
   l'installer avec la commande suivante:
-    ~~~
+    ~~~.console
     sudo apt-get install libnetaddr-ip-perl
     ~~~
   Si l'erreur suivante apparait lors de l'utilisation du module:
-    ~~~
+    ~~~.console
     Can't locate auto/NetAddr/IP/InetBase/AF_INET6.al in @INC (...)
     at /usr/lib/x86_64-linux-gnu/perl5/5.20/NetAddr/IP/InetBase.pm line 81.
     ~~~
   Il s'agit d'un bug connu avec l'autoloader. Il suffit de corriger le fichier
   InetBase.pm et rajouter
-    ~~~
+    ~~~.perl
     use Socket;
     ~~~
   juste après
-    ~~~
+    ~~~.perl
     package NetAddr::IP::InetBase;
     ~~~
   cf ci-dessous pour une procédure automatique de correction sur debian jessie,
   valable au 29/12/2016
 
 * Si ce n'est déjà fait, configurer `LOCAL_CODE` dans gitolite.rc
-    ~~~
+    ~~~.gitolite-rc
     LOCAL_CODE => "$ENV{HOME}/local",
     ~~~
 
 * Dans le répertoire `LOCAL_CODE`, copier HostBasedAuth.pm dans le
   sous-répertoire lib/Gitolite/Triggers
-    ~~~
+    ~~~.console
     srcdir=PATH/TO/gitolite-contrib
 
     localdir="$(gitolite query-rc LOCAL_CODE)"
@@ -100,7 +99,7 @@ git commit -am "initial"
     ~~~
 
 * Activer le trigger HostBasedAuth dans gitolite.rc
-    ~~~
+    ~~~.gitolite-rc
     INPUT => [
         'HostBasedAuth::input',
     ],
@@ -110,7 +109,7 @@ git commit -am "initial"
 
 * IMPORTANT: comme il s'agit d'un accès par http, il faut autoriser l'accès au
   user `daemon` pour tous les dépôt concernés, e.g
-    ~~~
+    ~~~.gitolite-conf
     repo gitolite-admin
         - = daemon
         option deny-rules = 1
@@ -118,7 +117,7 @@ git commit -am "initial"
         R = daemon
     ~~~
   ou spécifiquement pour un dépôt:
-    ~~~
+    ~~~.gitolite-conf
     repo myrepo
         R = daemon
         RW+ = writer
@@ -147,7 +146,7 @@ qualifiés, de domaines ou de noms d'hôtes pour lequels la traduction est
 effectuée, c'est à dire qui sont autorisés à accéder au dépôt.
 
 Exemples:
-~~~
+~~~.gitolite-conf
 option map-anonhttp = user from 10.11.12.13 192.168.1.50
 option map-anonhttp-1 = user from 10.50.60.0/24
 option map-anonhttp-2 = user from hostname.domain .domain hostname
@@ -179,7 +178,7 @@ le nom d'hôte est construit à partir des groupes de correspondances numérique
 trouvés sur le nom du dépôt.
 
 Un exemple sera sans doute plus parlant:
-~~~
+~~~.gitolite-conf
 repo hosts/..*
     RW+ = user
     option match-repo = hosts/([^/]+)/config
@@ -188,12 +187,42 @@ repo hosts/..*
 Dans cet exemple, les dépôts de la forme 'hosts/HOST/config' sont accessibles et
 modifiables depuis les hôtes 'HOST.domain'
 
+IMPORTANT: l'exemple ci-dessus ne fonctionnera pas tel quel. En effet, les
+expressions régulières font usage de caractères interdits dans les options. Il y
+a deux solutions, exposées dans la documentation de gitolite (chercher la phrase
+"compensating for UNSAFE_PATT" sur http://gitolite.com/gitolite/git-config)
+
+* La plus simple mais potentiellement la plus dangereuse est de modifier la
+  valeur de $UNSAFE_PATT. Dans l'exemple suivant, les caractères `$ ( ) |` sont
+  autorisés:
+    ~~~.gitolite-rc
+    $UNSAFE_PATT = qr([`~#\&;<>]);
+    ~~~
+
+* L'autre méthode consiste à définir des noms symboliques pour les caractères
+  interdits et utiliser ces noms symboliques dans les expressions:
+    ~~~.gitolite-rc
+    SAFE_CONFIG => {
+        1 => '$1', 2 => '$2', 3 => '$3', 4 => '$4', 5 => '$5', 6 => '$6', 7 => '$7', 8 => '$8', 9 => '$9',
+        ANY => '(.*)',
+        NAME => '([^/]+)',
+        PATH => '([^/]+(?:/[^/]+)*)',
+    },
+    ~~~
+  L'exemple ci-dessus peut alors s'écrire:
+    ~~~.gitolite-conf
+    repo hosts/..*
+        RW+ = user
+        option match-repo = hosts/%NAME/config
+        option map-anonhttp = user from %1.domain
+    ~~~
+
 ## Patch de NetAddr::IP pour Debian Jessie
 
 Au 29/12/2016, le bug avec NetAddr::IP existe toujours sur debian jessie et
 peut-être corrigé de cette manière (ne pas oublier de corriger les chemins et/ou
 les versions des packages):
-~~~
+~~~.console
 sudo patch <<EOF
 --- /usr/lib/x86_64-linux-gnu/perl5/5.20/NetAddr/IP/InetBase.pm.orig	2016-12-29 14:54:19.396359452 +0400
 +++ /usr/lib/x86_64-linux-gnu/perl5/5.20/NetAddr/IP/InetBase.pm	2016-12-29 14:33:37.888900910 +0400

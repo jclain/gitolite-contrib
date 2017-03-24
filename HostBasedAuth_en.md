@@ -20,7 +20,7 @@ For each repo:
   anonymous user, even if the anonymous user's privileges are higher.
 
 In the following example:
-~~~
+~~~.gitolite-conf
 repo repo1
     R = reader
     RW = writer
@@ -42,8 +42,7 @@ git commands (git-upload-pack, git-receive-pack, git-upload-archive) are all
 supported. Here is a complete example:
 
 With the following configuration:
-~~~
-# gitolite.conf
+~~~.gitolite-conf
 repo hba/..*
     C = user
     RW+ = user
@@ -51,7 +50,7 @@ repo hba/..*
 ~~~
 The following commands create a new repo from myhost on myrepos, clone it and
 then commit a file:
-~~~
+~~~.console
 # on myhost
 curl -fs http://myrepos/anongit/create?hba/test
 git clone http://myrepos/anongit/hba/test
@@ -63,11 +62,11 @@ git commit -am "initial"
 ## Installation
 
 * NetAddr::IP is required. On debian jessie, it can be installed with
-    ~~~
+    ~~~.console
     sudo apt-get install libnetaddr-ip-perl
     ~~~
   If you have this error:
-    ~~~
+    ~~~.console
     Can't locate auto/NetAddr/IP/InetBase/AF_INET6.al in @INC (...)
     at /usr/lib/x86_64-linux-gnu/perl5/5.20/NetAddr/IP/InetBase.pm line 81.
     ~~~
@@ -82,12 +81,12 @@ git commit -am "initial"
   cf below for a patch usable on debian jessie, as of 12/29/2016
 
 * If not done yet, you have to configure `LOCAL_CODE` in gitolite.rc
-    ~~~
+    ~~~.gitolite-rc
     LOCAL_CODE => "$ENV{HOME}/local",
     ~~~
 
 * Copy HostBasedAuth.pm to `LOCAL_CODE`/lib/Gitolite/Triggers
-    ~~~
+    ~~~.console
     srcdir=PATH/TO/gitolite-contrib
 
     localdir="$(gitolite query-rc LOCAL_CODE)"
@@ -97,7 +96,7 @@ git commit -am "initial"
     ~~~
 
 * Enable the trigger in gitolite.rc
-    ~~~
+    ~~~.gitolite-rc
     INPUT => [
         'HostBasedAuth::input',
     ],
@@ -107,7 +106,7 @@ git commit -am "initial"
 
 * IMPORTANT: in smart-http mode, you have to authorize the user `daemon` for all
   relevant repositories, e.g
-    ~~~
+    ~~~.gitolite-conf
     repo gitolite-admin
         - = daemon
         option deny-rules = 1
@@ -115,7 +114,7 @@ git commit -am "initial"
         R = daemon
     ~~~
   or for one repo:
-    ~~~
+    ~~~.gitolite-conf
     repo myrepo
         R = daemon
         RW+ = writer
@@ -142,7 +141,7 @@ qualified hosts, domains, or hosts; or an IP address classs for which `anonhttp`
 replaced with the user.
 
 Examples:
-~~~
+~~~.gitolite-conf
 option map-anonhttp = user from 10.11.12.13 192.168.1.50
 option map-anonhttp-1 = user from 10.50.60.0/24
 option map-anonhttp-2 = user from hostname.domain .domain hostname
@@ -165,7 +164,7 @@ match-repo regex. The host is built from capture groups from the regex and
 can be used in subsequent 'map-anonhttp' options.
 
 Example:
-~~~
+~~~.gitolite-conf
 repo hosts/..*
     RW+ = user
     option match-repo = hosts/([^/]+)/config
@@ -174,12 +173,39 @@ repo hosts/..*
 In this example, a repo named 'hosts/HOST/config' is accessible from the host
 'HOST.domain'
 
+IMPORTANT: the example above won't work out of the box, because of character
+restriction in config variables. There are two solutions to this problem (look
+for "compensating for UNSAFE_PATT" on http://gitolite.com/gitolite/git-config)
+
+* The simplest but potentially the more dangerous one is to modify the value of
+  $UNSAFE_PATT. In the following example, the characters `$ ( ) |` are allowed:
+    ~~~.gitolite-rc
+    $UNSAFE_PATT = qr([`~#\&;<>]);
+    ~~~
+
+* Another method is to define symbolic names and use them in the regexes:
+    ~~~.gitolite-rc
+    SAFE_CONFIG => {
+        1 => '$1', 2 => '$2', 3 => '$3', 4 => '$4', 5 => '$5', 6 => '$6', 7 => '$7', 8 => '$8', 9 => '$9',
+        ANY => '(.*)',
+        NAME => '([^/]+)',
+        PATH => '([^/]+(?:/[^/]+)*)',
+    },
+    ~~~
+  The example above can then be written as:
+    ~~~.gitolite-conf
+    repo hosts/..*
+        RW+ = user
+        option match-repo = hosts/%NAME/config
+        option map-anonhttp = user from %1.domain
+    ~~~
+
 ## NetAddr::IP patch for Debian Jessie
 
 As of 29/12/2016, the NetAddr::IP bug still exists on debian jessie. The
 following command does the fix (don't forget to adapt paths and/or package
 versions)
-~~~
+~~~.console
 sudo patch <<EOF
 --- /usr/lib/x86_64-linux-gnu/perl5/5.20/NetAddr/IP/InetBase.pm.orig	2016-12-29 14:54:19.396359452 +0400
 +++ /usr/lib/x86_64-linux-gnu/perl5/5.20/NetAddr/IP/InetBase.pm	2016-12-29 14:33:37.888900910 +0400

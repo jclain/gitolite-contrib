@@ -105,6 +105,21 @@ git commit -am "initial"
     ],
     ~~~
 
+* Définir des noms symboliques si on veut utiliser les expressions régulières
+  avec les options `match-repo` et `map-anonhttp`. Cette partie est optionnelle,
+  et il y a d'autres façon de procéder. Pour les détails, cf la description de
+  l'option `match-repo` ci-dessous.
+    ~~~.gitolite-rc
+    SAFE_CONFIG => {
+        1 => '$1', 2 => '$2', 3 => '$3', 4 => '$4', 5 => '$5', 6 => '$6', 7 => '$7', 8 => '$8', 9 => '$9',
+        ANY => '(.*)',
+        NAME => '([^/]+)',
+        PATH => '([^/]+(?:/[^/]+)*)',
+        HOST => '(([^/.]+)(\.[^/]+)?)', # %1 is host, %2 is hostname, %3 is .domain
+        NSUFF => '([0-9]*)',
+    },
+    ~~~
+
 ## Configuration
 
 * IMPORTANT: comme il s'agit d'un accès par http, il faut autoriser l'accès au
@@ -129,6 +144,8 @@ git commit -am "initial"
   `map-anonhttp` entre un utilisateur autorisé et les hôtes pour lesquels le
   user `anonhttp` doit être traduit.
 
+## Référence
+
 ### anonhttp
 
 Ce user est celui qui identifie les connexions http anonymes. C'est uniquement
@@ -141,9 +158,22 @@ Par défaut, on prend la valeur de `%RC{HTTP_ANON_USER}`, sinon `anonhttp`
 ### option map-anonhttp
 
 Cette option permet de définir une correspondance entre un nom d'utilisateur et
-une liste d'adresses IP, de classes d'adresses IP, de noms d'hôtes pleinement
-qualifiés, de domaines ou de noms d'hôtes pour lequels la traduction est
-effectuée, c'est à dire qui sont autorisés à accéder au dépôt.
+des hôtes pour lesquels la traduction est effectuée, c'est à dire des hôtes qui
+seront autorisés à accéder au dépôt.
+
+#### Syntaxe standard
+
+Syntaxe:
+~~~
+option map-anonhttp = USER from IPSPEC|NAMESPEC...
+~~~
+
+Avec cette syntaxe, les hôtes sont spécifiés sous forme:
+* d'adresses IP, e.g `192.168.15.23`
+* de classes d'adresses IP, e.g `10.50.60.0/24`
+* de noms d'hôtes, e.g. `hostname`
+* de domaines, e.g `.domain.tld`
+* de noms d'hôtes pleinement qualifiés, e.g `hostname.domain.tld`
 
 Exemples:
 ~~~.gitolite-conf
@@ -169,6 +199,54 @@ valides.
 Note: pour les nom d'hôte et de domaine, les syntaxes `*.domain` et `hostname.*`
 sont supportées et sont équivalentes respectivement à `.domain` et `hostname`
 
+#### Syntaxe regex
+
+Syntaxe:
+~~~
+option map-anonhttp[-SUFFIX] = USER from ~REGEX
+option map-anonhttp[-SUFFIX] = USER from /REGEX/
+~~~
+
+Avec cette syntaxe, les hôtes sont spécifiés sous forme de regex, qui ne matche
+que le nom d'hôte pleinement qualifié ou le nom d'hôte simple selon qu'il y a ou
+non une occurence de '\.' dans l'expression.
+
+La première syntaxe `~REGEX` rajoute automatiquement les ancres `^` et `$` et
+met en echappement le caractère `.`. La deuxième syntaxe spécifie une expression
+régulière qu'il faut utiliser telle quelle, sans modification. Ainsi, les deux
+lignes suivantes sont strictement équivalentes:
+~~~.gitolite-conf
+option map-anonhttp = user from ~host[0-9]+.tld
+option map-anonhttp = user from /^host[0-9]+\.tld$/
+~~~
+Dans les deux cas, la correspondance est effectuée sans tenir compte de la
+casse. Il n'est pas possible de spécifier d'autre modifieurs pour la regex.
+
+La première syntaxe est particulièrement appropriée pour l'utilisation avec
+l'option `match-repo`, e.g:
+~~~.gitolite-conf
+repo hosts/..*/..*
+    RW+ = user
+    # needs SAFE_CONFIG definition in gitolite.rc
+    option match-repo = hosts/%HOST/%ANY
+    option map-anonhttp = user from ~%2%NSUFF%3
+~~~
+En effet, comme le nom d'hôte est extrait du nom du dépôt avec `match-repo`, il
+faut pouvoir mettre en échappement les caractères `.` du nom de domaine pour
+éviter une correspondance malheureuse avec un nom d'hôte qui n'a rien à voir.
+
+Dans l'exemple ci-dessus, les dépôts de la forme `hosts/HOST/ANYTHING` peuvent
+être accédés par les hôtes dont le nom est `HOST` suivi d'un suffixe numérique
+quelconque.
+* Par exemple, le dépôt `hosts/mysql/config` pourra être accédé par les hôtes
+`mysql`, `mysql1.we.com` et `mysql2.them.net` (comme la regex `mysql`
+correspondant au nom du dépôt ne contient pas de domaine, le domaine de l'hôte
+n'est pas considéré)
+* De la même façon, le dépôt `hosts/ldap.we.com/data` peut être accédé par les
+hôtes `ldap.we.com`, `ldap2.we.com` et `ldap53.we.com` mais pas `ldap1.them.org`
+(comme la regex `ldap\.we\.com` correspondant au nom du dépôt contient un
+domaine, le domaine de l'hôte est vérifié aussi)
+
 ### option match-repo
 
 Cette option permet de faire des correspondance d'hôte sur la base du nom du
@@ -177,15 +255,16 @@ régulière de l'option `match-repo`. Si une correspondance est trouvée, alors
 le nom d'hôte est construit à partir des groupes de correspondances numériques
 trouvés sur le nom du dépôt.
 
-Un exemple sera sans doute plus parlant:
+Un exemple sera sans doute plus parlant. Dans l'exemple suivant, les dépôts de
+la forme 'hosts/HOST/config' sont accessibles et modifiables depuis les hôtes
+'HOST.domain':
 ~~~.gitolite-conf
 repo hosts/..*
     RW+ = user
+    # ATTENTION! cet exemple ne fonctionne pas avec la configuration par défaut
     option match-repo = hosts/([^/]+)/config
     option map-anonhttp = user from $1.domain
 ~~~
-Dans cet exemple, les dépôts de la forme 'hosts/HOST/config' sont accessibles et
-modifiables depuis les hôtes 'HOST.domain'
 
 IMPORTANT: l'exemple ci-dessus ne fonctionnera pas tel quel. En effet, les
 expressions régulières font usage de caractères interdits dans les options. Il y
@@ -198,18 +277,11 @@ a deux solutions, exposées dans la documentation de gitolite (chercher la phras
     ~~~.gitolite-rc
     $UNSAFE_PATT = qr([`~#\&;<>]);
     ~~~
-
 * L'autre méthode consiste à définir des noms symboliques pour les caractères
-  interdits et utiliser ces noms symboliques dans les expressions:
-    ~~~.gitolite-rc
-    SAFE_CONFIG => {
-        1 => '$1', 2 => '$2', 3 => '$3', 4 => '$4', 5 => '$5', 6 => '$6', 7 => '$7', 8 => '$8', 9 => '$9',
-        ANY => '(.*)',
-        NAME => '([^/]+)',
-        PATH => '([^/]+(?:/[^/]+)*)',
-    },
-    ~~~
-  L'exemple ci-dessus peut alors s'écrire:
+  interdits et utiliser ces noms symboliques dans les expressions. cf les
+  instructions d'installation plus haut qui donnent un ensemble par défaut très
+  utile pour débuter. Si l'installation a été faite en définissant les noms
+  symbolique suggérés plus haut, l'exemple ci-dessus peut s'écrire:
     ~~~.gitolite-conf
     repo hosts/..*
         RW+ = user

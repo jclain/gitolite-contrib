@@ -52,7 +52,7 @@ sub process_repo {
     my @matches;
     if ($match_repo) {
         T "got option \"match-repo = $match_repo\", trying to match...";
-        @matches = $repo =~ $match_repo;
+        @matches = map { defined() ? $_: '' } $repo =~ $match_repo;
         T "got \@matches=(@matches)";
         return unless @matches;
     }
@@ -74,49 +74,83 @@ sub process_repo {
                 my $thost = $from_host;
                 for my $i (0 .. $#matches) {
                     my $from = '\$'.($i + 1);
-                    my $to = $matches[$i];
+                    my $to = defined($matches[$i])? $matches[$i]: '';
                     $thost =~ s/$from/$to/e;
                 }
                 T "from_host=$from_host translates to from_host=$thost";
                 $from_host = $thost;
             }
 
-            if (__is_host($from_host)) {
+            if ($from_host =~ /^(?:~.+|\/.+\/)$/) {
+                # regex match
+                if ($from_host =~ /^~(.+)/) {
+                    # quote '.' and add anchors
+                    $from_host = $1;
+                    $from_host =~ s/\./\\./g;
+                    $from_host = '^'.$from_host.'$';
+                } elsif ($from_host =~ /\/(.+)\//) {
+                    # use the regex as-is
+                    $from_host = $1;
+                }
+
+                if ($from_host =~ /\\\.|\[[^]]*\.[^]]*\]/) {
+                    # host with domain
+                    T "trying regex match against clienthost=$clienthost";
+                    if ($clienthost =~ /$from_host/i) {
+                        T "...matched";
+                        log_info("clienthost=$clienthost matches with regex from_host=$from_host", "mapping $anon_user to $to_user");
+                        __map_user($to_user);
+                        last;
+                    }
+
+                } else {
+                    # hostname without domain
+                    T "trying regex match against clientname=$clientname";
+                    if ($clientname =~ /$from_host/i) {
+                        T "...matched";
+                        log_info("clientname=$clientname matches with regex from_host=$from_host", "mapping $anon_user to $to_user");
+                        __map_user($to_user);
+                        last;
+                    }
+                }
+
+                T "...not matched";
+
+            } elsif (__is_host($from_host)) {
                 $from_host =~ s/^\*\././;          # *.domain   === .domain
                 $from_host =~ s/^([^.]+)\.\*$/$1/; # hostname.* === hostname
                 if ($from_host =~ /^\./) {
                     # .domain match
                     T "trying .domain match";
                     if (lc $from_host eq lc $clientdomain) {
+                        T "...matched";
                         log_info("clientdomain=$clientdomain matches with from_host=$from_host", "mapping $anon_user to $to_user");
                         __map_user($to_user);
                         last;
-                    } else {
-                        T "...not matched";
                     }
 
                 } elsif ($from_host =~ /\./) {
                     # host.domain match
                     T "trying host.domain match";
                     if (lc $from_host eq lc $clienthost) {
+                        T "...matched";
                         log_info("clienthost=$clienthost matches with from_host=$from_host", "mapping $anon_user to $to_user");
                         __map_user($to_user);
                         last;
-                    } else {
-                        T "...not matched";
                     }
 
                 } else {
                     # host match
                     T "trying host match";
                     if (lc $from_host eq lc $clientname) {
+                        T "...matched";
                         log_info("clientname=$clientname matches with from_host=$from_host", "mapping $anon_user to $to_user");
                         __map_user($to_user);
                         last;
-                    } else {
-                        T "...not matched";
                     }
                 }
+
+                T "...not matched";
 
             } elsif (my $from_hostip = new NetAddr::IP::Lite($from_host)) {
                 # ip match
@@ -125,12 +159,13 @@ sub process_repo {
 
                 T "trying ip match";
                 if ($from_hostip->network() eq $maskip->network()) {
+                        T "...matched";
                     log_info("matched clientip=$clientip with from_host=$from_host", "mapping $anon_user to $to_user");
                     __map_user($to_user);
                     last;
-                } else {
-                    T "...not matched";
                 }
+
+                T "...not matched";
             }
         }
     }

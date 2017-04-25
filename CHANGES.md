@@ -1,3 +1,10 @@
+## Version 0.3.0 du 25/04/2017-22:00
+
+* `3afa0ee` réorganiser la doc
+* `63b5d36` Intégration de la branche map-regexes
+  * `1a8ec15` support regexes dans l'option map-anonhttp
+  * `6c483c0` maj doc
+
 ## Version 0.2.2 du 24/03/2017-14:36
 
 * `6cbba19` maj doc sur l'utilisation des regex avec match-repo

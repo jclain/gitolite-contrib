@@ -225,7 +225,7 @@ In this example, repos named `hosts/HOST/ANYTHING` are accessible by any host
 whose name is HOST with a numeric suffix.
 * For example, the repo named `hosts/mysql/config` is accessible by the hosts
 `mysql`, `mysql1.we.com` and `mysql2.them.net` (there is no domain in the
-corresponding `mysql` regex so the domain name is not checked)
+corresponding regex `mysql` so the domain name is not checked)
 * Likewise, the repo named `hosts/ldap.we.com/data` is accessible by the hosts
 `ldap.we.com`, `ldap2.we.com` and `ldap53.we.com` but *not* `ldap15.them.org`
 (there is a domain in the corresponding regex `ldap\.we\.com`, so the domain

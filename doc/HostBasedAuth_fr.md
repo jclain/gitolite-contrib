@@ -163,7 +163,6 @@ seront autorisés à accéder au dépôt.
 
 #### Syntaxe standard
 
-Syntaxe:
 ~~~
 option map-anonhttp = USER from IPSPEC|NAMESPEC...
 ~~~
@@ -201,7 +200,6 @@ sont supportées et sont équivalentes respectivement à `.domain` et `hostname`
 
 #### Syntaxe regex
 
-Syntaxe:
 ~~~
 option map-anonhttp[-SUFFIX] = USER from ~REGEX
 option map-anonhttp[-SUFFIX] = USER from /REGEX/
@@ -256,8 +254,8 @@ le nom d'hôte est construit à partir des groupes de correspondances numérique
 trouvés sur le nom du dépôt.
 
 Un exemple sera sans doute plus parlant. Dans l'exemple suivant, les dépôts de
-la forme 'hosts/HOST/config' sont accessibles et modifiables depuis les hôtes
-'HOST.domain':
+la forme `hosts/HOST/config` sont accessibles et modifiables depuis les hôtes
+`HOST.domain`:
 ~~~.gitolite-conf
 repo hosts/..*
     RW+ = user

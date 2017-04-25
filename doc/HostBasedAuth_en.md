@@ -104,7 +104,7 @@ git commit -am "initial"
 
 * Define symbolic names if you want to use regexes with the options `match-repo`
   and `match-anonhttp`. This step is optional, and there are alternatives. See
-  below the desciption of the option `match-repo` for details.
+  below the description of the option `match-repo` for details.
     ~~~.gitolite-rc
     SAFE_CONFIG => {
         1 => '$1', 2 => '$2', 3 => '$3', 4 => '$4', 5 => '$5', 6 => '$6', 7 => '$7', 8 => '$8', 9 => '$9',
@@ -157,7 +157,6 @@ This option defines a mapping between a user and one or more hosts for which
 
 #### Standard syntax
 
-Syntax:
 ~~~
 option map-anonhttp = USER from IPSPEC|NAMESPEC...
 ~~~
@@ -187,7 +186,6 @@ equivalent to `.domain` and `hostname`, respectively.
 
 #### Regex syntax
 
-Syntax:
 ~~~
 option map-anonhttp[-SUFFIX] = USER from ~REGEX
 option map-anonhttp[-SUFFIX] = USER from /REGEX/
@@ -234,12 +232,12 @@ name is checked)
 ### option match-repo
 
 This option matches a host based on the name of the repo. It must be used in
-conjunction with 'map-anonhttp'. First, the repo name is matched with the
+conjunction with `map-anonhttp`. First, the repo name is matched with the
 match-repo regex. The host is built from capture groups from the regex and
-can be used in subsequent 'map-anonhttp' options.
+can be used in subsequent `map-anonhttp` options.
 
-In this example, a repo named 'hosts/HOST/config' is accessible from the host
-'HOST.domain':
+In this example, a repo named `hosts/HOST/config` is accessible from the host
+`HOST.domain`:
 ~~~.gitolite-conf
 repo hosts/..*
     RW+ = user

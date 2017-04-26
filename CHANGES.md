@@ -1,3 +1,9 @@
+## Version 0.3.1 du 26/04/2017-15:20
+
+* `1ac50d9` maj doc: HTTP_ANON_USER est requis
+* `8d50ec3` patch refuse de patcher avec le chemin fourni. se placer manuellement dans le chemin d'abord
+* `05a475d` corrections mineures de la doc
+
 ## Version 0.3.0 du 25/04/2017-22:00
 
 * `3afa0ee` réorganiser la doc

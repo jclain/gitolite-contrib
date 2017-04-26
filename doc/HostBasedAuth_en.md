@@ -80,9 +80,11 @@ git commit -am "initial"
     ~~~
   cf below for a patch usable on debian jessie, as of 12/29/2016
 
-* If not done yet, you have to configure `LOCAL_CODE` in gitolite.rc
+* If not done yet, you have to configure `LOCAL_CODE` and `HTTP_ANON_USER` (for
+  smart http mode) in gitolite.rc
     ~~~.gitolite-rc
     LOCAL_CODE => "$ENV{HOME}/local",
+    HTTP_ANON_USER => "anonhttp",
     ~~~
 
 * Copy HostBasedAuth.pm to `LOCAL_CODE`/lib/Gitolite/Triggers

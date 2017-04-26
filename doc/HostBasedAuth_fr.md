@@ -82,9 +82,11 @@ git commit -am "initial"
   cf ci-dessous pour une procédure automatique de correction sur debian jessie,
   valable au 29/12/2016
 
-* Si ce n'est déjà fait, configurer `LOCAL_CODE` dans gitolite.rc
+* Si ce n'est déjà fait, configurer `LOCAL_CODE` `HTTP_ANON_USER` (pour le mode
+  smart http) dans gitolite.rc
     ~~~.gitolite-rc
     LOCAL_CODE => "$ENV{HOME}/local",
+    HTTP_ANON_USER => "anonhttp",
     ~~~
 
 * Dans le répertoire `LOCAL_CODE`, copier HostBasedAuth.pm dans le

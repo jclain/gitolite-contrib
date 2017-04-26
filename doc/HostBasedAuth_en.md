@@ -80,9 +80,11 @@ git commit -am "initial"
     ~~~
   cf below for a patch usable on debian jessie, as of 12/29/2016
 
-* If not done yet, you have to configure `LOCAL_CODE` in gitolite.rc
+* If not done yet, you have to configure `LOCAL_CODE` and `HTTP_ANON_USER` (for
+  smart http mode) in gitolite.rc
     ~~~.gitolite-rc
     LOCAL_CODE => "$ENV{HOME}/local",
+    HTTP_ANON_USER => "anonhttp",
     ~~~
 
 * Copy HostBasedAuth.pm to `LOCAL_CODE`/lib/Gitolite/Triggers
@@ -104,7 +106,7 @@ git commit -am "initial"
 
 * Define symbolic names if you want to use regexes with the options `match-repo`
   and `match-anonhttp`. This step is optional, and there are alternatives. See
-  below the desciption of the option `match-repo` for details.
+  below the description of the option `match-repo` for details.
     ~~~.gitolite-rc
     SAFE_CONFIG => {
         1 => '$1', 2 => '$2', 3 => '$3', 4 => '$4', 5 => '$5', 6 => '$6', 7 => '$7', 8 => '$8', 9 => '$9',
@@ -157,7 +159,6 @@ This option defines a mapping between a user and one or more hosts for which
 
 #### Standard syntax
 
-Syntax:
 ~~~
 option map-anonhttp = USER from IPSPEC|NAMESPEC...
 ~~~
@@ -187,7 +188,6 @@ equivalent to `.domain` and `hostname`, respectively.
 
 #### Regex syntax
 
-Syntax:
 ~~~
 option map-anonhttp[-SUFFIX] = USER from ~REGEX
 option map-anonhttp[-SUFFIX] = USER from /REGEX/
@@ -234,12 +234,12 @@ name is checked)
 ### option match-repo
 
 This option matches a host based on the name of the repo. It must be used in
-conjunction with 'map-anonhttp'. First, the repo name is matched with the
+conjunction with `map-anonhttp`. First, the repo name is matched with the
 match-repo regex. The host is built from capture groups from the regex and
-can be used in subsequent 'map-anonhttp' options.
+can be used in subsequent `map-anonhttp` options.
 
-In this example, a repo named 'hosts/HOST/config' is accessible from the host
-'HOST.domain':
+In this example, a repo named `hosts/HOST/config` is accessible from the host
+`HOST.domain`:
 ~~~.gitolite-conf
 repo hosts/..*
     RW+ = user
@@ -274,9 +274,10 @@ As of 29/12/2016, the NetAddr::IP bug still exists on debian jessie. The
 following command does the fix (don't forget to adapt paths and/or package
 versions)
 ~~~.console
+cd /usr/lib/x86_64-linux-gnu/perl5/5.20/NetAddr/IP
 sudo patch <<EOF
---- /usr/lib/x86_64-linux-gnu/perl5/5.20/NetAddr/IP/InetBase.pm.orig	2016-12-29 14:54:19.396359452 +0400
-+++ /usr/lib/x86_64-linux-gnu/perl5/5.20/NetAddr/IP/InetBase.pm	2016-12-29 14:33:37.888900910 +0400
+--- InetBase.pm.orig 2016-12-29 14:54:19.396359452 +0400
++++ InetBase.pm 2016-12-29 14:33:37.888900910 +0400
 @@ -1,5 +1,6 @@
  #!/usr/bin/perl
  package NetAddr::IP::InetBase;

@@ -82,9 +82,11 @@ git commit -am "initial"
   cf ci-dessous pour une procédure automatique de correction sur debian jessie,
   valable au 29/12/2016
 
-* Si ce n'est déjà fait, configurer `LOCAL_CODE` dans gitolite.rc
+* Si ce n'est déjà fait, configurer `LOCAL_CODE` `HTTP_ANON_USER` (pour le mode
+  smart http) dans gitolite.rc
     ~~~.gitolite-rc
     LOCAL_CODE => "$ENV{HOME}/local",
+    HTTP_ANON_USER => "anonhttp",
     ~~~
 
 * Dans le répertoire `LOCAL_CODE`, copier HostBasedAuth.pm dans le
@@ -163,7 +165,6 @@ seront autorisés à accéder au dépôt.
 
 #### Syntaxe standard
 
-Syntaxe:
 ~~~
 option map-anonhttp = USER from IPSPEC|NAMESPEC...
 ~~~
@@ -201,7 +202,6 @@ sont supportées et sont équivalentes respectivement à `.domain` et `hostname`
 
 #### Syntaxe regex
 
-Syntaxe:
 ~~~
 option map-anonhttp[-SUFFIX] = USER from ~REGEX
 option map-anonhttp[-SUFFIX] = USER from /REGEX/
@@ -256,8 +256,8 @@ le nom d'hôte est construit à partir des groupes de correspondances numérique
 trouvés sur le nom du dépôt.
 
 Un exemple sera sans doute plus parlant. Dans l'exemple suivant, les dépôts de
-la forme 'hosts/HOST/config' sont accessibles et modifiables depuis les hôtes
-'HOST.domain':
+la forme `hosts/HOST/config` sont accessibles et modifiables depuis les hôtes
+`HOST.domain`:
 ~~~.gitolite-conf
 repo hosts/..*
     RW+ = user
@@ -295,9 +295,10 @@ Au 29/12/2016, le bug avec NetAddr::IP existe toujours sur debian jessie et
 peut-être corrigé de cette manière (ne pas oublier de corriger les chemins et/ou
 les versions des packages):
 ~~~.console
+cd /usr/lib/x86_64-linux-gnu/perl5/5.20/NetAddr/IP
 sudo patch <<EOF
---- /usr/lib/x86_64-linux-gnu/perl5/5.20/NetAddr/IP/InetBase.pm.orig	2016-12-29 14:54:19.396359452 +0400
-+++ /usr/lib/x86_64-linux-gnu/perl5/5.20/NetAddr/IP/InetBase.pm	2016-12-29 14:33:37.888900910 +0400
+--- InetBase.pm.orig 2016-12-29 14:54:19.396359452 +0400
++++ InetBase.pm 2016-12-29 14:33:37.888900910 +0400
 @@ -1,5 +1,6 @@
  #!/usr/bin/perl
  package NetAddr::IP::InetBase;

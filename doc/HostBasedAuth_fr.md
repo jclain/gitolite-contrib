@@ -293,9 +293,10 @@ Au 29/12/2016, le bug avec NetAddr::IP existe toujours sur debian jessie et
 peut-être corrigé de cette manière (ne pas oublier de corriger les chemins et/ou
 les versions des packages):
 ~~~.console
+cd /usr/lib/x86_64-linux-gnu/perl5/5.20/NetAddr/IP
 sudo patch <<EOF
---- /usr/lib/x86_64-linux-gnu/perl5/5.20/NetAddr/IP/InetBase.pm.orig	2016-12-29 14:54:19.396359452 +0400
-+++ /usr/lib/x86_64-linux-gnu/perl5/5.20/NetAddr/IP/InetBase.pm	2016-12-29 14:33:37.888900910 +0400
+--- InetBase.pm.orig 2016-12-29 14:54:19.396359452 +0400
++++ InetBase.pm 2016-12-29 14:33:37.888900910 +0400
 @@ -1,5 +1,6 @@
  #!/usr/bin/perl
  package NetAddr::IP::InetBase;

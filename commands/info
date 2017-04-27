@@ -57,7 +57,7 @@ sub args {
     my $help = '';
 
     GetOptions(
-        'no-hba' => \$legacy,
+        'legacy' => \$legacy,
         'lc'   => \$lc,
         'ld'   => \$ld,
         'json' => \$json,

@@ -58,7 +58,7 @@ sub hba_build_args {
     return if $user ne $anon_user;
 
     # check ip
-    (my $clientip = $ENV{SSH_CONNECTION} || '') =~ s/ .*//;
+    (my $clientip = $ENV{HTTP_X_FORWARDED_FOR} || $ENV{SSH_CONNECTION} || '') =~ s/ .*//;
     my $clientipdesc = $clientip || "(None)";
     T "got clientip=$clientipdesc";
     return unless $clientip;

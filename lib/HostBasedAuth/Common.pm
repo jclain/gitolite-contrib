@@ -20,7 +20,7 @@ sub log_die { # die with a single message, but log more info
     log_info(@_);
     _die($_[0]);
 }
-my $T = 1; # 1 to enable trace, 0 to disable
+my $T = 0; # 1 to enable trace, 0 to disable
 sub T { # trace if $T is true
     trace(1, @_) if $T;
 }

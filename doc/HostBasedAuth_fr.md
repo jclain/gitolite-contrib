@@ -110,13 +110,14 @@ git commit -am "initial"
 * Définir des noms symboliques si on veut utiliser les expressions régulières
   avec les options `match-repo` et `map-anonhttp`. Cette partie est optionnelle,
   et il y a d'autres façon de procéder. Pour les détails, cf la description de
-  l'option `match-repo` ci-dessous.
+  l'option `match-repo` ci-dessous. Voici un exemple de définitions:
     ~~~.gitolite-rc
     SAFE_CONFIG => {
         1 => '$1', 2 => '$2', 3 => '$3', 4 => '$4', 5 => '$5', 6 => '$6', 7 => '$7', 8 => '$8', 9 => '$9',
         ANY => '(.*)',
         NAME => '([^/]+)',
         PATH => '([^/]+(?:/[^/]+)*)',
+        QRE => '~",
         HOST => '(([^/.]+)(\.[^/]+)?)', # %1 is host, %2 is hostname, %3 is .domain
         NSUFF => '([0-9]*)',
     },
@@ -229,7 +230,7 @@ repo hosts/..*/..*
     RW+ = user
     # needs SAFE_CONFIG definition in gitolite.rc
     option match-repo = hosts/%HOST/%ANY
-    option map-anonhttp = user from ~%2%NSUFF%3
+    option map-anonhttp = user from %QRE%2%NSUFF%3
 ~~~
 En effet, comme le nom d'hôte est extrait du nom du dépôt avec `match-repo`, il
 faut pouvoir mettre en échappement les caractères `.` du nom de domaine pour

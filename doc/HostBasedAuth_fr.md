@@ -36,11 +36,12 @@ Bien entendu, il n'est pas obligatoire de définir chacun des types d'accès pou
 le dépôt. L'exemple montre simplement qu'il est possible de définir des règles
 différentes en fonction de l'hôte qui fait la requête.
 
-Les verbes supportés sont la commande create (pour les dépôts de type wild) et
+Les verbes supportés sont la commande 'create' (pour les dépôts de type wild) et
 tous ceux associés aux commandes git (git-upload-pack, git-receive-pack,
-git-upload-archive). Voici un exemple complet:
+git-upload-archive). De plus, une implémentation de la commande 'info' qui tient
+compte des autorisations définies est fournie.
 
-Pour la configuration suivante:
+Par exemple, pour la configuration suivante:
 ~~~.gitolite-conf
 repo hba/..*
     C = user
@@ -89,14 +90,13 @@ git commit -am "initial"
     HTTP_ANON_USER => "anonhttp",
     ~~~
 
-* Dans le répertoire `LOCAL_CODE`, copier HostBasedAuth.pm dans le
-  sous-répertoire lib/Gitolite/Triggers
+* Copier les arborescences `lib` et `commands` dans le répertoire `LOCAL_CODE`
     ~~~.console
     srcdir=PATH/TO/gitolite-contrib
 
     localdir="$(gitolite query-rc LOCAL_CODE)"
     [ -d "$localdir" ] &&
-        rsync -r "$srcdir/lib" "$localdir" ||
+        rsync -r "$srcdir/lib" "$srcdir/commands" "$localdir" ||
         echo "LOCAL_DIR: not found nor defined"
     ~~~
 
@@ -288,6 +288,12 @@ a deux solutions, exposées dans la documentation de gitolite (chercher la phras
         option match-repo = hosts/%NAME/config
         option map-anonhttp = user from %1.domain
     ~~~
+
+### commande info
+
+Cette commande est identique à la commande 'info' livrée avec gitolite, sauf
+qu'elle tient compte aussi des autorisations accordées à l'hôte qui fait la
+requête. L'option `-legacy` permet de retrouver le fonctionnement standard.
 
 ## Patch de NetAddr::IP pour Debian Jessie
 

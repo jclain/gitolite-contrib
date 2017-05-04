@@ -39,9 +39,10 @@ privileges for each repo. This example is only to show that this is possible.
 
 The gitolite verb 'create' (used to create wild-repos) and those associated with
 git commands (git-upload-pack, git-receive-pack, git-upload-archive) are all
-supported. Here is a complete example:
+supported. An implementation of the command 'info' that is HostBasedAuth-aware
+is also provided.
 
-With the following configuration:
+For example, with the following configuration:
 ~~~.gitolite-conf
 repo hba/..*
     C = user
@@ -87,13 +88,13 @@ git commit -am "initial"
     HTTP_ANON_USER => "anonhttp",
     ~~~
 
-* Copy HostBasedAuth.pm to `LOCAL_CODE`/lib/Gitolite/Triggers
+* Copy `lib` and `commands` to `LOCAL_CODE`
     ~~~.console
     srcdir=PATH/TO/gitolite-contrib
 
     localdir="$(gitolite query-rc LOCAL_CODE)"
     [ -d "$localdir" ] &&
-        rsync -r "$srcdir/lib" "$localdir" ||
+        rsync -r "$srcdir/lib" "$srcdir/commands" "$localdir" ||
         echo "LOCAL_DIR: not found nor defined"
     ~~~
 
@@ -267,6 +268,12 @@ for "compensating for UNSAFE_PATT" on http://gitolite.com/gitolite/git-config)
         option match-repo = hosts/%NAME/config
         option map-anonhttp = user from %1.domain
     ~~~
+
+### command info
+
+This command works like the one shipped with gitolite, but take into account the
+authorizations given to the calling host. Use the option `-legacy` to have the
+standard behavior.
 
 ## NetAddr::IP patch for Debian Jessie
 

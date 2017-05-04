@@ -1,3 +1,12 @@
+## Version 0.4.0 du 04/05/2017-18:06
+
+* `31bed15` désactiver le mode debug
+* `85c5365` maj doc pour la nouvelle commande info
+* `eb35a61` bug
+* `2e968a1` support des reverse-proxy
+* `ea74489` renommer hbainfo en info et rajouter l'option -legacy pour retrouver le comportement original
+* `720a972` refactoriser le code pour implémenter hbainfo
+
 ## Version 0.3.1 du 26/04/2017-15:20
 
 * `1ac50d9` maj doc: HTTP_ANON_USER est requis

@@ -1,3 +1,8 @@
+## Version 0.4.1 du 05/05/2017-12:49
+
+* `ced726d` déplacer les fichiers dans localcode/ pour simplifier la maintenance
+* `284ac94` maj doc: définir QRE dans SAFE_CONFIG
+
 ## Version 0.4.0 du 04/05/2017-18:06
 
 * `31bed15` désactiver le mode debug

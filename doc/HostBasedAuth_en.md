@@ -107,13 +107,15 @@ git commit -am "initial"
 
 * Define symbolic names if you want to use regexes with the options `match-repo`
   and `match-anonhttp`. This step is optional, and there are alternatives. See
-  below the description of the option `match-repo` for details.
+  below the description of the option `match-repo` for details. Here is an
+  example:
     ~~~.gitolite-rc
     SAFE_CONFIG => {
         1 => '$1', 2 => '$2', 3 => '$3', 4 => '$4', 5 => '$5', 6 => '$6', 7 => '$7', 8 => '$8', 9 => '$9',
         ANY => '(.*)',
         NAME => '([^/]+)',
         PATH => '([^/]+(?:/[^/]+)*)',
+        QRE => '~",
         HOST => '(([^/.]+)(\.[^/]+)?)', # %1 is host, %2 is hostname, %3 is .domain
         NSUFF => '([0-9]*)',
     },
@@ -216,7 +218,7 @@ repo hosts/..*/..*
     RW+ = user
     # needs SAFE_CONFIG definition in gitolite.rc
     option match-repo = hosts/%HOST/%ANY
-    option map-anonhttp = user from ~%2%NSUFF%3
+    option map-anonhttp = user from %QRE%2%NSUFF%3
 ~~~
 Indeed, as the hostname is extracted as-is from the repo name with `match-repo`,
 automatic escaping of the dot character is needed to avoid matching another

@@ -42,4 +42,4 @@ fi
 echo "* Actual installation to $localdir"
 
 echo "* Copying files..."
-rsync -r "$scriptdir/lib" "$scriptdir/commands" "$localdir"
+rsync -r "$scriptdir/localcode/" "$localdir"

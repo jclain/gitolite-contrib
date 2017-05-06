@@ -15,16 +15,16 @@ sub input {
 
     # check verb
     my $git_commands = "git-upload-pack|git-receive-pack|git-upload-archive";
-    my $create_command = "create";
-    T "checking soc=\"$ENV{SSH_ORIGINAL_COMMAND}\" for verb in ($git_commands|$create_command)";
-    if ( $ENV{SSH_ORIGINAL_COMMAND} =~ /($git_commands) '\/?(\S+)'$/ ) {
+    my $other_commands = "create";
+    T "checking soc=\"$ENV{SSH_ORIGINAL_COMMAND}\" for verb in ($git_commands|$other_commands)";
+    if ( $ENV{SSH_ORIGINAL_COMMAND} =~ /^($git_commands) '\/?(\S+)'$/ ) {
         my $command = $1;
         (my $repo = $2) =~ s/\.git$//;
         T "got repo=$repo with verb $command";
 
         return unless my $user = hba_process_repo @args, $repo;
         map_user $user;
-    } elsif ( $ENV{SSH_ORIGINAL_COMMAND} =~ /($create_command) \/?(\S+)$/ ) {
+    } elsif ( $ENV{SSH_ORIGINAL_COMMAND} =~ /^(create) \/?(\S+)$/ ) {
         my $command = $1;
         (my $repo = $2) =~ s/\.git$//;
         T "got repo=$repo with verb $command";

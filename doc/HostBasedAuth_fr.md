@@ -36,10 +36,12 @@ Bien entendu, il n'est pas obligatoire de définir chacun des types d'accès pou
 le dépôt. L'exemple montre simplement qu'il est possible de définir des règles
 différentes en fonction de l'hôte qui fait la requête.
 
-Les verbes supportés sont la commande 'create' (pour les dépôts de type wild) et
-tous ceux associés aux commandes git (git-upload-pack, git-receive-pack,
-git-upload-archive). De plus, une implémentation de la commande 'info' qui tient
-compte des autorisations définies est fournie.
+Les verbes suivants sont supportés:
+* tous ceux associés aux commandes git (git-upload-pack, git-receive-pack,
+  git-upload-archive)
+* create (pour créer des dépôts de type wild)
+De plus, une implémentation de la commande info qui tient compte des
+autorisations définies est fournie.
 
 Par exemple, pour la configuration suivante:
 ~~~.gitolite-conf
@@ -96,7 +98,7 @@ git commit -am "initial"
 
     localdir="$(gitolite query-rc LOCAL_CODE)"
     [ -d "$localdir" ] &&
-        rsync -r "$srcdir/lib" "$srcdir/commands" "$localdir" ||
+        rsync -r "$srcdir/localcode/" "$localdir" ||
         echo "LOCAL_DIR: not found nor defined"
     ~~~
 

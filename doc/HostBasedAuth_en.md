@@ -37,10 +37,12 @@ the repo is:
 You need not define users and mappings for reader, writer and enforcer
 privileges for each repo. This example is only to show that this is possible.
 
-The gitolite verb 'create' (used to create wild-repos) and those associated with
-git commands (git-upload-pack, git-receive-pack, git-upload-archive) are all
-supported. An implementation of the command 'info' that is HostBasedAuth-aware
-is also provided.
+The following gitolite verbs are supported:
+* those associated with git commands (git-upload-pack, git-receive-pack,
+  git-upload-archive)
+* create (used to create wild-repos)
+An implementation of the command info that is HostBasedAuth-aware is also
+provided.
 
 For example, with the following configuration:
 ~~~.gitolite-conf
@@ -94,7 +96,7 @@ git commit -am "initial"
 
     localdir="$(gitolite query-rc LOCAL_CODE)"
     [ -d "$localdir" ] &&
-        rsync -r "$srcdir/lib" "$srcdir/commands" "$localdir" ||
+        rsync -r "$srcdir/localcode/" "$localdir" ||
         echo "LOCAL_DIR: not found nor defined"
     ~~~
 

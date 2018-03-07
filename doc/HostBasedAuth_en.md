@@ -37,10 +37,12 @@ the repo is:
 You need not define users and mappings for reader, writer and enforcer
 privileges for each repo. This example is only to show that this is possible.
 
-The gitolite verb 'create' (used to create wild-repos) and those associated with
-git commands (git-upload-pack, git-receive-pack, git-upload-archive) are all
-supported. An implementation of the command 'info' that is HostBasedAuth-aware
-is also provided.
+The following gitolite verbs are supported:
+* those associated with git commands (git-upload-pack, git-receive-pack,
+  git-upload-archive)
+* create (used to create wild-repos)
+An implementation of the command info that is HostBasedAuth-aware is also
+provided.
 
 For example, with the following configuration:
 ~~~.gitolite-conf
@@ -94,7 +96,7 @@ git commit -am "initial"
 
     localdir="$(gitolite query-rc LOCAL_CODE)"
     [ -d "$localdir" ] &&
-        rsync -r "$srcdir/lib" "$srcdir/commands" "$localdir" ||
+        rsync -r "$srcdir/localcode/" "$localdir" ||
         echo "LOCAL_DIR: not found nor defined"
     ~~~
 
@@ -111,13 +113,14 @@ git commit -am "initial"
   example:
     ~~~.gitolite-rc
     SAFE_CONFIG => {
+        QRE => '~', REA => '/^', REZ => '$/',
         1 => '$1', 2 => '$2', 3 => '$3', 4 => '$4', 5 => '$5', 6 => '$6', 7 => '$7', 8 => '$8', 9 => '$9',
         ANY => '(.*)',
         NAME => '([^/]+)',
         PATH => '([^/]+(?:/[^/]+)*)',
-        QRE => '~",
         HOST => '(([^/.]+)(\.[^/]+)?)', # %1 is host, %2 is hostname, %3 is .domain
         NSUFF => '([0-9]*)',
+        TSUFF => '(?:-(?:prod|test|devel|dev))?',
     },
     ~~~
 

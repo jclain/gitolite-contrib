@@ -36,10 +36,12 @@ Bien entendu, il n'est pas obligatoire de définir chacun des types d'accès pou
 le dépôt. L'exemple montre simplement qu'il est possible de définir des règles
 différentes en fonction de l'hôte qui fait la requête.
 
-Les verbes supportés sont la commande 'create' (pour les dépôts de type wild) et
-tous ceux associés aux commandes git (git-upload-pack, git-receive-pack,
-git-upload-archive). De plus, une implémentation de la commande 'info' qui tient
-compte des autorisations définies est fournie.
+Les verbes suivants sont supportés:
+* tous ceux associés aux commandes git (git-upload-pack, git-receive-pack,
+  git-upload-archive)
+* create (pour créer des dépôts de type wild)
+De plus, une implémentation de la commande info qui tient compte des
+autorisations définies est fournie.
 
 Par exemple, pour la configuration suivante:
 ~~~.gitolite-conf
@@ -96,7 +98,7 @@ git commit -am "initial"
 
     localdir="$(gitolite query-rc LOCAL_CODE)"
     [ -d "$localdir" ] &&
-        rsync -r "$srcdir/lib" "$srcdir/commands" "$localdir" ||
+        rsync -r "$srcdir/localcode/" "$localdir" ||
         echo "LOCAL_DIR: not found nor defined"
     ~~~
 
@@ -113,13 +115,14 @@ git commit -am "initial"
   l'option `match-repo` ci-dessous. Voici un exemple de définitions:
     ~~~.gitolite-rc
     SAFE_CONFIG => {
+        QRE => '~', REA => '/^', REZ => '$/',
         1 => '$1', 2 => '$2', 3 => '$3', 4 => '$4', 5 => '$5', 6 => '$6', 7 => '$7', 8 => '$8', 9 => '$9',
         ANY => '(.*)',
         NAME => '([^/]+)',
         PATH => '([^/]+(?:/[^/]+)*)',
-        QRE => '~",
         HOST => '(([^/.]+)(\.[^/]+)?)', # %1 is host, %2 is hostname, %3 is .domain
         NSUFF => '([0-9]*)',
+        TSUFF => '(?:-(?:prod|test|devel|dev))?',
     },
     ~~~
 

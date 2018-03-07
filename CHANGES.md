@@ -1,3 +1,8 @@
+## Version 0.4.2 du 07/03/2018-11:11
+
+* `5621560` maj doc
+* `efa7e09` maj doc
+
 ## Version 0.4.1 du 05/05/2017-12:49
 
 * `ced726d` déplacer les fichiers dans localcode/ pour simplifier la maintenance

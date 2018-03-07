@@ -115,13 +115,14 @@ git commit -am "initial"
   l'option `match-repo` ci-dessous. Voici un exemple de définitions:
     ~~~.gitolite-rc
     SAFE_CONFIG => {
+        QRE => '~', REA => '/^', REZ => '$/',
         1 => '$1', 2 => '$2', 3 => '$3', 4 => '$4', 5 => '$5', 6 => '$6', 7 => '$7', 8 => '$8', 9 => '$9',
         ANY => '(.*)',
         NAME => '([^/]+)',
         PATH => '([^/]+(?:/[^/]+)*)',
-        QRE => '~",
         HOST => '(([^/.]+)(\.[^/]+)?)', # %1 is host, %2 is hostname, %3 is .domain
         NSUFF => '([0-9]*)',
+        TSUFF => '(?:-(?:prod|test|devel|dev))?',
     },
     ~~~
 
